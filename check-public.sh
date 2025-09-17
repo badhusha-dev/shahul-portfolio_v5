@@ -9,16 +9,24 @@ if [ ! -d "public" ]; then
     echo "📁 Creating public directory structure..."
     
     mkdir -p public/icons public/cv public/images/blog public/images/projects
-    
-    # Create basic favicon.svg
+else
+    echo "✅ Public directory exists"
+fi
+
+# Create basic favicon.svg if it doesn't exist
+if [ ! -f "public/favicon.svg" ]; then
+    echo "📝 Creating basic favicon.svg..."
     cat > public/favicon.svg << 'EOF'
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <circle cx="50" cy="50" r="40" fill="#3b82f6"/>
   <text x="50" y="60" text-anchor="middle" fill="white" font-family="Arial" font-size="40" font-weight="bold">S</text>
 </svg>
 EOF
-    
-    # Create basic manifest.json
+fi
+
+# Create basic manifest.json if it doesn't exist
+if [ ! -f "public/manifest.json" ]; then
+    echo "📝 Creating basic manifest.json..."
     cat > public/manifest.json << 'EOF'
 {
   "name": "Shahul Portfolio",
@@ -42,43 +50,21 @@ EOF
   ]
 }
 EOF
-    
-    # Create basic icon
+fi
+
+# Create basic icon if it doesn't exist
+if [ ! -f "public/icons/icon-192x192.svg" ]; then
+    echo "📝 Creating basic icons..."
     cat > public/icons/icon-192x192.svg << 'EOF'
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
   <circle cx="96" cy="96" r="80" fill="#3b82f6"/>
   <text x="96" y="120" text-anchor="middle" fill="white" font-family="Arial" font-size="80" font-weight="bold">S</text>
 </svg>
 EOF
-    
     cp public/icons/icon-192x192.svg public/icons/icon-512x512.svg
-    
-    echo "✅ Created basic public directory structure"
-else
-    echo "✅ Public directory exists"
-    
-    # Check for required files
-    missing_files=()
-    
-    if [ ! -f "public/favicon.svg" ]; then
-        missing_files+=("favicon.svg")
-    fi
-    
-    if [ ! -f "public/manifest.json" ]; then
-        missing_files+=("manifest.json")
-    fi
-    
-    if [ ! -d "public/icons" ]; then
-        missing_files+=("icons directory")
-    fi
-    
-    if [ ${#missing_files[@]} -gt 0 ]; then
-        echo "⚠️  Missing files: ${missing_files[*]}"
-        echo "📝 You may need to pull the latest changes or create these files manually"
-    else
-        echo "✅ All required public files are present"
-    fi
 fi
+
+echo "✅ Public directory setup completed"
 
 echo ""
 echo "📋 Next steps:"

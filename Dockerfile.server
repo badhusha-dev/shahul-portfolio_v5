@@ -28,8 +28,9 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy PWA manifest, icons, and CV (create directories first)
 RUN mkdir -p /usr/share/nginx/html/icons /usr/share/nginx/html/cv
 
-# Copy public assets if they exist
-COPY public/ /tmp/public/ || true
+# Copy public assets - create empty directory if public doesn't exist
+RUN mkdir -p /tmp/public
+COPY public/ /tmp/public/
 RUN if [ -f /tmp/public/manifest.json ]; then cp /tmp/public/manifest.json /usr/share/nginx/html/; fi
 RUN if [ -d /tmp/public/icons ]; then cp -r /tmp/public/icons/* /usr/share/nginx/html/icons/; fi
 RUN if [ -d /tmp/public/cv ]; then cp -r /tmp/public/cv/* /usr/share/nginx/html/cv/; fi
