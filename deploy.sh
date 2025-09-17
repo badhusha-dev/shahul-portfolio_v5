@@ -78,6 +78,54 @@ deploy() {
     fi
 }
 
+# Function to deploy with optimized server files (for low disk space)
+deploy_server() {
+    print_status "Building optimized Docker images for server deployment..."
+    
+    # Check if optimized files exist
+    if [ ! -f "docker-compose.server.yml" ]; then
+        print_error "Optimized server files not found. Please ensure Dockerfile.server, Dockerfile.backend.server, and docker-compose.server.yml exist."
+        exit 1
+    fi
+    
+    docker-compose -f docker-compose.server.yml build --no-cache
+    
+    print_status "Starting optimized services..."
+    docker-compose -f docker-compose.server.yml up -d
+    
+    print_status "Waiting for services to be healthy..."
+    sleep 30
+    
+    # Check if services are running
+    if docker-compose -f docker-compose.server.yml ps | grep -q "Up"; then
+        print_success "Optimized services are running!"
+        print_status "Frontend: http://localhost"
+        print_status "Backend API: http://localhost:5174"
+    else
+        print_error "Some services failed to start. Check logs with: docker-compose -f docker-compose.server.yml logs"
+        exit 1
+    fi
+}
+
+# Function to clean up Docker system (for disk space issues)
+cleanup_docker() {
+    print_status "Performing aggressive Docker cleanup..."
+    
+    # Stop all containers
+    docker-compose down 2>/dev/null || true
+    docker-compose -f docker-compose.server.yml down 2>/dev/null || true
+    
+    # Remove all unused resources
+    docker system prune -a --volumes -f
+    docker builder prune -a -f
+    docker image prune -a -f
+    docker container prune -f
+    docker volume prune -f
+    
+    print_success "Docker cleanup completed!"
+    print_status "Disk space freed up. You can now try deployment again."
+}
+
 # Function to stop services
 stop() {
     print_status "Stopping services..."
@@ -119,24 +167,39 @@ show_help() {
     echo "Usage: $0 [COMMAND]"
     echo ""
     echo "Commands:"
-    echo "  deploy    Build and start all services"
-    echo "  stop      Stop all services"
-    echo "  restart   Restart all services"
-    echo "  logs      Show logs from all services"
-    echo "  status    Show status of all services"
-    echo "  cleanup   Stop services and clean up Docker resources"
-    echo "  help      Show this help message"
+    echo "  deploy        Build and start all services (standard)"
+    echo "  deploy-server Build and start services with optimized server files"
+    echo "  cleanup-docker Perform aggressive Docker cleanup for disk space issues"
+    echo "  stop          Stop all services"
+    echo "  restart       Restart all services"
+    echo "  logs          Show logs from all services"
+    echo "  status        Show status of all services"
+    echo "  cleanup       Stop services and clean up Docker resources"
+    echo "  help          Show this help message"
     echo ""
     echo "Examples:"
-    echo "  $0 deploy    # Deploy the application"
-    echo "  $0 logs      # View logs"
-    echo "  $0 status    # Check service status"
+    echo "  $0 deploy-server    # Deploy with optimized server files (recommended for low disk space)"
+    echo "  $0 cleanup-docker   # Clean up Docker system if running out of disk space"
+    echo "  $0 deploy           # Standard deployment"
+    echo "  $0 logs             # View logs"
+    echo "  $0 status           # Check service status"
+    echo ""
+    echo "Troubleshooting:"
+    echo "  If you get 'no space left on device' errors:"
+    echo "  1. Run: $0 cleanup-docker"
+    echo "  2. Then run: $0 deploy-server"
 }
 
 # Main script logic
 case "${1:-deploy}" in
     deploy)
         deploy
+        ;;
+    deploy-server)
+        deploy_server
+        ;;
+    cleanup-docker)
+        cleanup_docker
         ;;
     stop)
         stop
