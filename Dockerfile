@@ -28,11 +28,16 @@ COPY --from=build-stage /app/dist /usr/share/nginx/html
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy PWA manifest, icons, and CV
-COPY public/manifest.json /usr/share/nginx/html/
-COPY public/icons/ /usr/share/nginx/html/icons/
-COPY public/cv/ /usr/share/nginx/html/cv/
-COPY public/favicon.svg /usr/share/nginx/html/
+# Copy PWA manifest, icons, and CV (create directories first)
+RUN mkdir -p /usr/share/nginx/html/icons /usr/share/nginx/html/cv
+
+# Copy public assets if they exist
+COPY public/ /tmp/public/ || true
+RUN if [ -f /tmp/public/manifest.json ]; then cp /tmp/public/manifest.json /usr/share/nginx/html/; fi
+RUN if [ -d /tmp/public/icons ]; then cp -r /tmp/public/icons/* /usr/share/nginx/html/icons/; fi
+RUN if [ -d /tmp/public/cv ]; then cp -r /tmp/public/cv/* /usr/share/nginx/html/cv/; fi
+RUN if [ -f /tmp/public/favicon.svg ]; then cp /tmp/public/favicon.svg /usr/share/nginx/html/; fi
+RUN rm -rf /tmp/public
 
 # Create nginx user and set permissions
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
