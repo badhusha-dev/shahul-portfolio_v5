@@ -19,8 +19,8 @@ RUN npm run build
 # Production stage with nginx
 FROM nginx:alpine as production-stage
 
-# Install curl for health checks
-RUN apk add --no-cache curl
+# Install wget for health checks (smaller than curl)
+RUN apk add --no-cache wget
 
 # Copy built assets from build stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
@@ -43,7 +43,7 @@ EXPOSE 80
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost/health || exit 1
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
