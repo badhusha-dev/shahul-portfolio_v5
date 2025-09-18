@@ -70,8 +70,7 @@ deploy() {
     # Check if services are running
     if docker-compose ps | grep -q "Up"; then
         print_success "Services are running!"
-        print_status "Frontend: http://localhost"
-        print_status "Backend API: http://localhost:5174"
+        print_status "Frontend: http://localhost:2025"
     else
         print_error "Some services failed to start. Check logs with: docker-compose logs"
         exit 1
@@ -84,7 +83,7 @@ deploy_server() {
     
     # Check if optimized files exist
     if [ ! -f "docker-compose.server.yml" ]; then
-        print_error "Optimized server files not found. Please ensure Dockerfile.server, Dockerfile.backend.server, and docker-compose.server.yml exist."
+        print_error "Optimized server files not found. Please ensure Dockerfile.server and docker-compose.server.yml exist."
         exit 1
     fi
     
@@ -99,8 +98,7 @@ deploy_server() {
     # Check if services are running
     if docker-compose -f docker-compose.server.yml ps | grep -q "Up"; then
         print_success "Optimized services are running!"
-        print_status "Frontend: http://localhost"
-        print_status "Backend API: http://localhost:5174"
+        print_status "Frontend: http://localhost:2025"
     else
         print_error "Some services failed to start. Check logs with: docker-compose -f docker-compose.server.yml logs"
         exit 1
@@ -183,11 +181,6 @@ show_help() {
     echo "  $0 deploy           # Standard deployment"
     echo "  $0 logs             # View logs"
     echo "  $0 status           # Check service status"
-    echo ""
-    echo "Troubleshooting:"
-    echo "  If you get 'no space left on device' errors:"
-    echo "  1. Run: $0 cleanup-docker"
-    echo "  2. Then run: $0 deploy-server"
 }
 
 # Main script logic
