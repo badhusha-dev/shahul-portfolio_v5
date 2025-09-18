@@ -37,6 +37,7 @@ COPY public/ /tmp/public/
 RUN if [ -f /tmp/public/manifest.json ]; then cp /tmp/public/manifest.json /usr/share/nginx/html/; fi
 RUN if [ -d /tmp/public/icons ] && [ "$(ls -A /tmp/public/icons)" ]; then cp -r /tmp/public/icons/* /usr/share/nginx/html/icons/; fi
 RUN if [ -d /tmp/public/cv ] && [ "$(ls -A /tmp/public/cv)" ]; then cp -r /tmp/public/cv/* /usr/share/nginx/html/cv/; fi
+RUN if [ -d /tmp/public/images ] && [ "$(ls -A /tmp/public/images)" ]; then cp -r /tmp/public/images /usr/share/nginx/html/; fi
 RUN if [ -f /tmp/public/favicon.svg ]; then cp /tmp/public/favicon.svg /usr/share/nginx/html/; fi
 RUN rm -rf /tmp/public
 
