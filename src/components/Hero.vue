@@ -104,7 +104,7 @@ export default {
   background: linear-gradient(135deg, var(--primary-color), var(--info-color));
   color: white;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .hero-section::before {

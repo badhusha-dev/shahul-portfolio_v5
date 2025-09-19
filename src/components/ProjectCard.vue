@@ -7,14 +7,14 @@
       
       <div class="project-tech">
         <span 
-          v-for="tech in project.techStack.slice(0, 4)" 
+          v-for="tech in (project.technologies || project.techStack || []).slice(0, 4)" 
           :key="tech" 
           class="tech-tag"
         >
           {{ tech }}
         </span>
-        <span v-if="project.techStack.length > 4" class="tech-tag">
-          +{{ project.techStack.length - 4 }} more
+        <span v-if="(project.technologies || project.techStack || []).length > 4" class="tech-tag">
+          +{{ (project.technologies || project.techStack || []).length - 4 }} more
         </span>
       </div>
       

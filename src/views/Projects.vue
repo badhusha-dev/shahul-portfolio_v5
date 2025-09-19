@@ -138,7 +138,7 @@
                     <p class="lead mb-4">{{ featuredProject.description }}</p>
                     <div class="featured-tech mb-4">
                       <span 
-                        v-for="tech in featuredProject.techStack.slice(0, 5)" 
+                        v-for="tech in featuredProject.technologies.slice(0, 5)" 
                         :key="tech" 
                         class="tech-tag me-2"
                       >
@@ -239,7 +239,7 @@ export default {
     totalTechnologies() {
       const allTechs = new Set()
       this.projects.forEach(project => {
-        project.techStack.forEach(tech => allTechs.add(tech))
+        project.technologies.forEach(tech => allTechs.add(tech))
       })
       return allTechs.size
     },
@@ -250,7 +250,7 @@ export default {
       const techCount = {}
       
       this.projects.forEach(project => {
-        project.techStack.forEach(tech => {
+        project.technologies.forEach(tech => {
           if (!techCount[tech]) {
             techCount[tech] = 0
           }

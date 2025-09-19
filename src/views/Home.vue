@@ -214,7 +214,7 @@ export default {
 
 <style scoped>
 .home-page {
-  padding-top: 80px;
+  padding-top: 100px;
 }
 
 .section {
