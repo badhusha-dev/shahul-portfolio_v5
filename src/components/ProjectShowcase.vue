@@ -588,6 +588,9 @@ export default {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .stat-card {
@@ -634,10 +637,12 @@ export default {
 /* Projects Container */
 .projects-container.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 2rem;
-  justify-items: center;
-  align-items: start;
+  justify-items: stretch;
+  align-items: stretch;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .projects-container.list {
@@ -663,9 +668,9 @@ export default {
   transition: all 0.3s ease;
   height: 100%;
   width: 100%;
-  max-width: 400px;
   display: flex;
   flex-direction: column;
+  align-self: stretch;
 }
 
 .project-card:hover {
@@ -1124,6 +1129,13 @@ export default {
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+  .projects-container.grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   .showcase-controls {
     padding: 1rem;
@@ -1147,6 +1159,7 @@ export default {
   .projects-container.grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+    max-width: 100%;
   }
   
   .project-card {
@@ -1156,6 +1169,12 @@ export default {
   .search-input-wrapper {
     max-width: 100%;
   }
+  
+  .project-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
   
   .modal-header {
     flex-direction: column;
