@@ -1,440 +1,354 @@
 <template>
   <div class="enhanced-contact-form">
-    <div class="container">
-      <!-- Page Header -->
-      <div class="page-header text-center py-5">
-        <h1 class="display-4 fw-bold mb-3 animate__animated animate__fadeInDown">Get In Touch</h1>
-        <p class="lead animate__animated animate__fadeInUp animate__delay-1s">Let's discuss your next project</p>
+    <div class="form-container">
+      <div class="form-header">
+        <h2 class="form-title">
+          <i class="fas fa-envelope me-2"></i>
+          Get In Touch
+        </h2>
+        <p class="form-subtitle">
+          Ready to work together? Send me a message and I'll get back to you within 24 hours.
+        </p>
       </div>
 
-      <div class="row">
-        <!-- Contact Information -->
-        <div class="col-lg-4 mb-5">
-          <div class="contact-info-card card card-custom h-100 animate__animated animate__fadeInLeft">
-            <div class="card-body">
-              <h3 class="card-title mb-4">Contact Information</h3>
-              
-              <div class="contact-item mb-4">
-                <div class="contact-icon">
-                  <i class="fas fa-envelope text-primary"></i>
+      <form @submit.prevent="submitForm" class="contact-form" novalidate>
+        <!-- Name Field -->
+        <div class="form-group">
+          <label for="name" class="form-label">
+            <i class="fas fa-user"></i>
+            Full Name *
+          </label>
+          <div class="input-wrapper">
+            <input
+              id="name"
+              v-model="form.name"
+              type="text"
+              class="form-input"
+              :class="{ 'error': errors.name, 'success': !errors.name && form.name }"
+              placeholder="Enter your full name"
+              @blur="validateField('name')"
+              @input="clearError('name')"
+              required
+            >
+            <div class="input-icon">
+              <i class="fas fa-check" v-if="!errors.name && form.name"></i>
+              <i class="fas fa-exclamation-triangle" v-if="errors.name"></i>
                 </div>
-                <div class="contact-details">
-                  <h6>Email</h6>
-                  <a :href="`mailto:${personalInfo.email}`" class="text-decoration-none">{{ personalInfo.email }}</a>
                 </div>
-              </div>
-
-              <div class="contact-item mb-4">
-                <div class="contact-icon">
-                  <i class="fas fa-phone text-primary"></i>
-                </div>
-                <div class="contact-details">
-                  <h6>Phone</h6>
-                  <a :href="`tel:${personalInfo.phone}`" class="text-decoration-none">{{ personalInfo.phone }}</a>
-                </div>
-              </div>
-
-              <div class="contact-item mb-4">
-                <div class="contact-icon">
-                  <i class="fas fa-map-marker-alt text-primary"></i>
-                </div>
-                <div class="contact-details">
-                  <h6>Location</h6>
-                  <span>{{ personalInfo.location }}</span>
+          <div class="error-message" v-if="errors.name">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ errors.name }}
                 </div>
               </div>
 
-              <div class="contact-item mb-4">
-                <div class="contact-icon">
-                  <i class="fas fa-clock text-primary"></i>
-                </div>
-                <div class="contact-details">
-                  <h6>Availability</h6>
-                  <span>Mon - Fri, 9:00 AM - 6:00 PM IST</span>
-                </div>
-              </div>
-
-              <hr class="my-4">
-
-              <h5 class="mb-3">Follow Me</h5>
-              <div class="social-links">
-                <a :href="personalInfo.linkedin" target="_blank" class="social-link" title="LinkedIn">
-                  <i class="fab fa-linkedin-in"></i>
-                </a>
-                <a :href="personalInfo.github" target="_blank" class="social-link" title="GitHub">
-                  <i class="fab fa-github"></i>
-                </a>
-                <a :href="personalInfo.cv" download class="social-link" title="Download CV">
-                  <i class="fas fa-download"></i>
-                </a>
-                <a href="mailto:{{ personalInfo.email }}" class="social-link" title="Email">
+        <!-- Email Field -->
+        <div class="form-group">
+          <label for="email" class="form-label">
                   <i class="fas fa-envelope"></i>
-                </a>
-              </div>
+            Email Address *
+          </label>
+          <div class="input-wrapper">
+                    <input 
+                      id="email"
+                      v-model="form.email"
+              type="email"
+              class="form-input"
+              :class="{ 'error': errors.email, 'success': !errors.email && form.email }"
+              placeholder="Enter your email address"
+                      @blur="validateField('email')"
+              @input="clearError('email')"
+              required
+            >
+            <div class="input-icon">
+              <i class="fas fa-check" v-if="!errors.email && form.email"></i>
+              <i class="fas fa-exclamation-triangle" v-if="errors.email"></i>
             </div>
+          </div>
+          <div class="error-message" v-if="errors.email">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ errors.email }}
+                  </div>
+                </div>
+
+        <!-- Phone Field -->
+        <div class="form-group">
+          <label for="phone" class="form-label">
+            <i class="fas fa-phone"></i>
+            Phone Number
+          </label>
+          <div class="input-wrapper">
+                    <input 
+                      id="phone"
+                      v-model="form.phone"
+              type="tel"
+              class="form-input"
+              :class="{ 'error': errors.phone, 'success': !errors.phone && form.phone }"
+              placeholder="Enter your phone number"
+                      @blur="validateField('phone')"
+              @input="clearError('phone')"
+                    >
+            <div class="input-icon">
+              <i class="fas fa-check" v-if="!errors.phone && form.phone"></i>
+              <i class="fas fa-exclamation-triangle" v-if="errors.phone"></i>
+                  </div>
+          </div>
+          <div class="error-message" v-if="errors.phone">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ errors.phone }}
           </div>
         </div>
 
-        <!-- Enhanced Contact Form -->
-        <div class="col-lg-8 mb-5">
-          <div class="contact-form-card card card-custom animate__animated animate__fadeInRight">
-            <div class="card-body">
-              <h3 class="card-title mb-4">Send Me a Message</h3>
-              
-              <form @submit.prevent="submitForm" class="contact-form" enctype="multipart/form-data">
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label for="name" class="form-label">Name *</label>
-                    <input 
-                      type="text" 
-                      class="form-control form-control-custom" 
-                      id="name"
-                      v-model="form.name"
-                      :class="{ 'is-invalid': errors.name }"
-                      required
-                      @blur="validateField('name')"
-                    >
-                    <div v-if="errors.name" class="invalid-feedback">{{ errors.name }}</div>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label">Email *</label>
-                    <input 
-                      type="email" 
-                      class="form-control form-control-custom" 
-                      id="email"
-                      v-model="form.email"
-                      :class="{ 'is-invalid': errors.email }"
-                      required
-                      @blur="validateField('email')"
-                    >
-                    <div v-if="errors.email" class="invalid-feedback">{{ errors.email }}</div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label for="phone" class="form-label">Phone</label>
-                    <input 
-                      type="tel" 
-                      class="form-control form-control-custom" 
-                      id="phone"
-                      v-model="form.phone"
-                      @blur="validateField('phone')"
-                    >
-                    <div v-if="errors.phone" class="invalid-feedback">{{ errors.phone }}</div>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label for="subject" class="form-label">Subject *</label>
-                    <input 
-                      type="text" 
-                      class="form-control form-control-custom" 
+        <!-- Subject Field -->
+        <div class="form-group">
+          <label for="subject" class="form-label">
+            <i class="fas fa-tag"></i>
+            Subject *
+          </label>
+          <div class="input-wrapper">
+            <select
                       id="subject"
                       v-model="form.subject"
-                      :class="{ 'is-invalid': errors.subject }"
+              class="form-input"
+              :class="{ 'error': errors.subject, 'success': !errors.subject && form.subject }"
+              @change="validateField('subject')"
                       required
-                      @blur="validateField('subject')"
-                    >
-                    <div v-if="errors.subject" class="invalid-feedback">{{ errors.subject }}</div>
+            >
+              <option value="">Select a subject</option>
+              <option value="project-inquiry">Project Inquiry</option>
+              <option value="collaboration">Collaboration</option>
+              <option value="job-opportunity">Job Opportunity</option>
+              <option value="freelance-work">Freelance Work</option>
+              <option value="consultation">Consultation</option>
+              <option value="other">Other</option>
+            </select>
+            <div class="input-icon">
+              <i class="fas fa-check" v-if="!errors.subject && form.subject"></i>
+              <i class="fas fa-exclamation-triangle" v-if="errors.subject"></i>
+                  </div>
+                </div>
+          <div class="error-message" v-if="errors.subject">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ errors.subject }}
                   </div>
                 </div>
 
-                <div class="mb-3">
-                  <label for="message" class="form-label">Message *</label>
-                  <textarea 
-                    class="form-control form-control-custom" 
-                    id="message"
-                    rows="6"
-                    v-model="form.message"
-                    :class="{ 'is-invalid': errors.message }"
-                    required
-                    @blur="validateField('message')"
-                    @input="updateCharacterCount"
-                  ></textarea>
-                  <div class="character-count">
-                    {{ characterCount }}/1000 characters
-                  </div>
-                  <div v-if="errors.message" class="invalid-feedback">{{ errors.message }}</div>
-                </div>
-
-                <!-- File Upload Section -->
-                <div class="mb-3">
-                  <label for="attachments" class="form-label">Attachments (Optional)</label>
-                  <div class="file-upload-area" 
-                       :class="{ 'drag-over': isDragOver, 'has-files': uploadedFiles.length > 0 }"
-                       @dragover.prevent="handleDragOver"
-                       @dragleave.prevent="handleDragLeave"
-                       @drop.prevent="handleDrop">
+        <!-- Custom Subject Field -->
+        <div class="form-group" v-if="form.subject === 'other'">
+          <label for="customSubject" class="form-label">
+            <i class="fas fa-edit"></i>
+            Custom Subject *
+          </label>
+          <div class="input-wrapper">
                     <input 
-                      type="file" 
-                      id="attachments"
-                      ref="fileInput"
-                      multiple
-                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
-                      @change="handleFileSelect"
-                      style="display: none;"
-                    >
-                    <div class="upload-content">
-                      <i class="fas fa-cloud-upload-alt"></i>
-                      <p>Drag & drop files here or <button type="button" @click="$refs.fileInput.click()" class="upload-btn">browse</button></p>
-                      <small>Supported formats: PDF, DOC, DOCX, TXT, JPG, PNG, GIF (Max 10MB each)</small>
+              id="customSubject"
+              v-model="form.customSubject"
+              type="text"
+              class="form-input"
+              :class="{ 'error': errors.customSubject, 'success': !errors.customSubject && form.customSubject }"
+              placeholder="Enter your custom subject"
+              @blur="validateField('customSubject')"
+              @input="clearError('customSubject')"
+            >
+            <div class="input-icon">
+              <i class="fas fa-check" v-if="!errors.customSubject && form.customSubject"></i>
+              <i class="fas fa-exclamation-triangle" v-if="errors.customSubject"></i>
+            </div>
+          </div>
+          <div class="error-message" v-if="errors.customSubject">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ errors.customSubject }}
                     </div>
                   </div>
                   
-                  <!-- File List -->
-                  <div v-if="uploadedFiles.length > 0" class="file-list">
-                    <div v-for="(file, index) in uploadedFiles" :key="index" class="file-item">
-                      <div class="file-info">
-                        <i :class="getFileIcon(file.type)"></i>
-                        <div class="file-details">
-                          <span class="file-name">{{ file.name }}</span>
-                          <span class="file-size">{{ formatFileSize(file.size) }}</span>
+        <!-- Message Field -->
+        <div class="form-group">
+          <label for="message" class="form-label">
+            <i class="fas fa-comment"></i>
+            Message *
+          </label>
+          <div class="textarea-wrapper">
+            <textarea
+              id="message"
+              v-model="form.message"
+              class="form-textarea"
+              :class="{ 'error': errors.message, 'success': !errors.message && form.message }"
+              placeholder="Tell me about your project or how I can help you..."
+              rows="6"
+              @blur="validateField('message')"
+              @input="clearError('message')"
+              required
+            ></textarea>
+            <div class="textarea-footer">
+              <div class="char-count" :class="{ 'warning': form.message.length > 800 }">
+                {{ form.message.length }}/1000 characters
                         </div>
                       </div>
-                      <button type="button" @click="removeFile(index)" class="remove-file">
-                        <i class="fas fa-times"></i>
-                      </button>
                     </div>
+          <div class="error-message" v-if="errors.message">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ errors.message }}
                   </div>
                 </div>
 
-                <!-- Calendar Integration -->
-                <div class="mb-3">
-                  <label class="form-label">Preferred Meeting Time</label>
-                  <div class="calendar-section">
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label for="meeting-date" class="form-label">Date</label>
+        <!-- Budget Range -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-dollar-sign"></i>
+            Budget Range (Optional)
+          </label>
+          <div class="budget-options">
+            <label v-for="budget in budgetOptions" :key="budget.value" class="budget-option">
                         <input 
-                          type="date" 
-                          class="form-control form-control-custom" 
-                          id="meeting-date"
-                          v-model="form.meetingDate"
-                          :min="minDate"
-                        >
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="meeting-time" class="form-label">Time</label>
-                        <select class="form-control form-control-custom" id="meeting-time" v-model="form.meetingTime">
-                          <option value="">Select time</option>
-                          <option v-for="time in availableTimes" :key="time" :value="time">
-                            {{ time }}
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="timezone-info">
-                      <small class="text-muted">
-                        <i class="fas fa-globe"></i>
-                        Times shown in IST (UTC+5:30)
-                      </small>
-                    </div>
+                type="radio"
+                v-model="form.budget"
+                :value="budget.value"
+                class="budget-radio"
+              >
+              <span class="budget-label">{{ budget.label }}</span>
+            </label>
                   </div>
                 </div>
 
-                <!-- Project Type Selection -->
-                <div class="mb-3">
-                  <label class="form-label">Project Type</label>
-                  <div class="project-type-grid">
-                    <label v-for="type in projectTypes" :key="type.value" class="project-type-option">
+        <!-- Timeline -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-clock"></i>
+            Project Timeline (Optional)
+          </label>
+          <div class="timeline-options">
+            <label v-for="timeline in timelineOptions" :key="timeline.value" class="timeline-option">
                       <input 
                         type="radio" 
-                        :value="type.value" 
-                        v-model="form.projectType"
-                        class="project-type-input"
-                      >
-                      <div class="project-type-card">
-                        <i :class="type.icon"></i>
-                        <span>{{ type.label }}</span>
-                      </div>
+                v-model="form.timeline"
+                :value="timeline.value"
+                class="timeline-radio"
+              >
+              <span class="timeline-label">{{ timeline.label }}</span>
                     </label>
                   </div>
                 </div>
 
-                <!-- Budget Range -->
-                <div class="mb-3">
-                  <label for="budget" class="form-label">Budget Range (Optional)</label>
-                  <select class="form-control form-control-custom" id="budget" v-model="form.budget">
-                    <option value="">Select budget range</option>
-                    <option value="under-5k">Under $5,000</option>
-                    <option value="5k-10k">$5,000 - $10,000</option>
-                    <option value="10k-25k">$10,000 - $25,000</option>
-                    <option value="25k-50k">$25,000 - $50,000</option>
-                    <option value="over-50k">Over $50,000</option>
-                    <option value="discuss">Let's discuss</option>
-                  </select>
-                </div>
-
-                <!-- Newsletter Subscription -->
-                <div class="mb-3">
-                  <div class="form-check">
+        <!-- File Upload -->
+        <div class="form-group">
+          <label for="file" class="form-label">
+            <i class="fas fa-paperclip"></i>
+            Attach Files (Optional)
+          </label>
+          <div class="file-upload">
                     <input 
-                      class="form-check-input" 
-                      type="checkbox" 
-                      id="newsletter"
-                      v-model="form.newsletter"
-                    >
-                    <label class="form-check-label" for="newsletter">
-                      Subscribe to my newsletter for updates and tech insights
+              id="file"
+              type="file"
+              ref="fileInput"
+              @change="handleFileUpload"
+              multiple
+              accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+              class="file-input"
+            >
+            <label for="file" class="file-label">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Choose files or drag and drop</span>
+              <small>PDF, DOC, TXT, JPG, PNG (Max 10MB each)</small>
                     </label>
                   </div>
+          <div v-if="uploadedFiles.length > 0" class="uploaded-files">
+            <div v-for="(file, index) in uploadedFiles" :key="index" class="uploaded-file">
+              <i class="fas fa-file"></i>
+              <span>{{ file.name }}</span>
+              <button type="button" @click="removeFile(index)" class="remove-file">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
                 </div>
 
-                <!-- Privacy Agreement -->
-                <div class="mb-3">
-                  <div class="form-check">
+        <!-- Privacy Notice -->
+        <div class="form-group">
+          <label class="checkbox-label">
                     <input 
-                      class="form-check-input" 
                       type="checkbox" 
-                      id="privacy"
-                      v-model="form.privacyAgreed"
-                      :class="{ 'is-invalid': errors.privacyAgreed }"
+              v-model="form.privacy"
+              class="checkbox-input"
                       required
                     >
-                    <label class="form-check-label" for="privacy">
-                      I agree to the <a href="#" @click.prevent="showPrivacyModal = true">Privacy Policy</a> and <a href="#" @click.prevent="showTermsModal = true">Terms of Service</a>
+            <span class="checkbox-text">
+              I agree to the <a href="#" @click.prevent="showPrivacyModal = true">Privacy Policy</a> 
+              and consent to the processing of my personal data.
+            </span>
                     </label>
+          <div class="error-message" v-if="errors.privacy">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ errors.privacy }}
                   </div>
-                  <div v-if="errors.privacyAgreed" class="invalid-feedback">{{ errors.privacyAgreed }}</div>
                 </div>
 
-                <div class="d-grid">
+        <!-- Submit Button -->
+        <div class="form-actions">
                   <button 
                     type="submit" 
-                    class="btn btn-primary-custom btn-custom"
+            class="submit-btn"
                     :disabled="isSubmitting || !isFormValid"
-                  >
-                    <span v-if="isSubmitting" class="loading me-2"></span>
-                    <i v-else class="fas fa-paper-plane me-2"></i>
-                    {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+            :class="{ 'loading': isSubmitting }"
+          >
+            <span v-if="!isSubmitting">
+              <i class="fas fa-paper-plane"></i>
+              Send Message
+            </span>
+            <span v-else>
+              <i class="fas fa-spinner fa-spin"></i>
+              Sending...
+            </span>
+          </button>
+          
+          <button
+            type="button"
+            @click="resetForm"
+            class="reset-btn"
+            :disabled="isSubmitting"
+          >
+            <i class="fas fa-undo"></i>
+            Reset Form
                   </button>
                 </div>
               </form>
 
               <!-- Success Message -->
-              <div v-if="showSuccess" class="alert alert-success mt-3 animate__animated animate__fadeIn">
-                <i class="fas fa-check-circle me-2"></i>
-                Thank you! Your message has been sent successfully. I'll get back to you soon.
-              </div>
-
-              <!-- Error Message -->
-              <div v-if="showError" class="alert alert-danger mt-3 animate__animated animate__fadeIn">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                {{ errorMessage }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Additional Information -->
-      <div class="row mt-5">
-        <div class="col-12">
-          <div class="additional-info card card-custom animate__animated animate__fadeInUp">
-            <div class="card-body">
-              <h3 class="card-title text-center mb-4">Why Work With Me?</h3>
-              <div class="row">
-                <div class="col-lg-3 col-md-6 mb-4">
-                  <div class="info-item text-center">
-                    <div class="info-icon mb-3">
-                      <i class="fas fa-rocket fa-3x text-primary"></i>
-                    </div>
-                    <h5>Fast Delivery</h5>
-                    <p class="text-muted">Quick turnaround times without compromising quality</p>
-                  </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                  <div class="info-item text-center">
-                    <div class="info-icon mb-3">
-                      <i class="fas fa-shield-alt fa-3x text-primary"></i>
-                    </div>
-                    <h5>Quality Assurance</h5>
-                    <p class="text-muted">Thorough testing and code reviews for reliable solutions</p>
-                  </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                  <div class="info-item text-center">
-                    <i class="fas fa-headset fa-3x text-primary"></i>
-                    </div>
-                    <h5>24/7 Support</h5>
-                    <p class="text-muted">Ongoing support and maintenance for your projects</p>
-                  </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                  <div class="info-item text-center">
-                    <div class="info-icon mb-3">
-                      <i class="fas fa-handshake fa-3x text-primary"></i>
-                    </div>
-                    <h5>Collaborative Approach</h5>
-                    <p class="text-muted">Working closely with clients to achieve their goals</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Response Time -->
-      <div class="row mt-5">
-        <div class="col-12 text-center">
-          <div class="response-time animate__animated animate__fadeInUp">
-            <h4 class="mb-3">Response Time</h4>
-            <p class="lead">I typically respond to inquiries within 24 hours</p>
-            <div class="response-stats">
-              <div class="row">
-                <div class="col-md-4">
-                  <div class="stat-item">
-                    <h5 class="text-primary">2-4 hours</h5>
-                    <p class="text-muted">Email Response</p>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="stat-item">
-                    <h5 class="text-primary">1-2 days</h5>
-                    <p class="text-muted">Project Quote</p>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="stat-item">
-                    <h5 class="text-primary">1 week</h5>
-                    <p class="text-muted">Project Start</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div v-if="showSuccess" class="success-message">
+        <div class="success-content">
+          <i class="fas fa-check-circle"></i>
+          <h3>Message Sent Successfully!</h3>
+          <p>Thank you for your message. I'll get back to you within 24 hours.</p>
+          <button @click="showSuccess = false" class="close-success">
+            <i class="fas fa-times"></i>
+          </button>
       </div>
     </div>
 
-    <!-- Privacy Policy Modal -->
-    <div v-if="showPrivacyModal" class="modal-overlay" @click="showPrivacyModal = false">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h4>Privacy Policy</h4>
-          <button @click="showPrivacyModal = false" class="modal-close">
+      <!-- Privacy Modal -->
+      <div v-if="showPrivacyModal" class="privacy-modal" @click="showPrivacyModal = false">
+        <div class="privacy-content" @click.stop>
+          <div class="privacy-header">
+            <h3>Privacy Policy</h3>
+            <button @click="showPrivacyModal = false" class="close-modal">
             <i class="fas fa-times"></i>
           </button>
         </div>
-        <div class="modal-body">
-          <p>Your privacy is important to us. We collect and use your information only as necessary to respond to your inquiry and provide our services.</p>
-          <p>We do not sell or share your personal information with third parties without your consent.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Terms of Service Modal -->
-    <div v-if="showTermsModal" class="modal-overlay" @click="showTermsModal = false">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h4>Terms of Service</h4>
-          <button @click="showTermsModal = false" class="modal-close">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>By using this contact form, you agree to our terms of service.</p>
-          <p>We reserve the right to modify these terms at any time.</p>
+          <div class="privacy-body">
+            <p>Your privacy is important to us. This policy explains how we collect, use, and protect your information when you contact us.</p>
+            <h4>Information We Collect</h4>
+            <ul>
+              <li>Name and contact information</li>
+              <li>Project details and requirements</li>
+              <li>Any files you choose to upload</li>
+            </ul>
+            <h4>How We Use Your Information</h4>
+            <ul>
+              <li>To respond to your inquiries</li>
+              <li>To provide project estimates</li>
+              <li>To communicate about potential collaboration</li>
+            </ul>
+            <h4>Data Protection</h4>
+            <p>We implement appropriate security measures to protect your personal information and never share it with third parties without your consent.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -442,48 +356,41 @@
 </template>
 
 <script>
-import { personalInfo } from '../data/personal.js'
-
 export default {
   name: 'EnhancedContactForm',
   data() {
     return {
-      personalInfo,
       form: {
         name: '',
         email: '',
         phone: '',
         subject: '',
+        customSubject: '',
         message: '',
-        meetingDate: '',
-        meetingTime: '',
-        projectType: '',
         budget: '',
-        newsletter: false,
-        privacyAgreed: false
+        timeline: '',
+        privacy: false
       },
       errors: {},
       isSubmitting: false,
       showSuccess: false,
-      showError: false,
-      errorMessage: '',
-      characterCount: 0,
-      uploadedFiles: [],
-      isDragOver: false,
       showPrivacyModal: false,
-      showTermsModal: false,
-      minDate: new Date().toISOString().split('T')[0],
-      availableTimes: [
-        '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
-        '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'
+      uploadedFiles: [],
+      budgetOptions: [
+        { value: 'under-5k', label: 'Under $5,000' },
+        { value: '5k-10k', label: '$5,000 - $10,000' },
+        { value: '10k-25k', label: '$10,000 - $25,000' },
+        { value: '25k-50k', label: '$25,000 - $50,000' },
+        { value: '50k-plus', label: '$50,000+' },
+        { value: 'discuss', label: 'Let\'s discuss' }
       ],
-      projectTypes: [
-        { value: 'web-development', label: 'Web Development', icon: 'fas fa-code' },
-        { value: 'mobile-app', label: 'Mobile App', icon: 'fas fa-mobile-alt' },
-        { value: 'backend-api', label: 'Backend API', icon: 'fas fa-server' },
-        { value: 'database-design', label: 'Database Design', icon: 'fas fa-database' },
-        { value: 'cloud-migration', label: 'Cloud Migration', icon: 'fas fa-cloud' },
-        { value: 'consulting', label: 'Consulting', icon: 'fas fa-lightbulb' }
+      timelineOptions: [
+        { value: 'asap', label: 'ASAP' },
+        { value: '1-month', label: 'Within 1 month' },
+        { value: '2-3-months', label: '2-3 months' },
+        { value: '3-6-months', label: '3-6 months' },
+        { value: '6-months-plus', label: '6+ months' },
+        { value: 'flexible', label: 'Flexible' }
       ]
     }
   },
@@ -493,210 +400,149 @@ export default {
              this.form.email && 
              this.form.subject && 
              this.form.message && 
-             this.form.privacyAgreed &&
-             this.characterCount <= 1000
+             this.form.privacy &&
+             Object.keys(this.errors).length === 0
     }
   },
   methods: {
-    validateField(fieldName) {
-      this.errors[fieldName] = ''
+    validateField(field) {
+      this.errors[field] = ''
       
-      switch (fieldName) {
+      switch (field) {
         case 'name':
           if (!this.form.name.trim()) {
             this.errors.name = 'Name is required'
+          } else if (this.form.name.trim().length < 2) {
+            this.errors.name = 'Name must be at least 2 characters'
           }
           break
+          
         case 'email':
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
           if (!this.form.email.trim()) {
             this.errors.email = 'Email is required'
-          } else if (!this.isValidEmail(this.form.email)) {
+          } else if (!emailRegex.test(this.form.email)) {
             this.errors.email = 'Please enter a valid email address'
           }
           break
+          
         case 'phone':
-          if (this.form.phone && !this.isValidPhone(this.form.phone)) {
+          if (this.form.phone && !/^[\+]?[1-9][\d]{0,15}$/.test(this.form.phone.replace(/\s/g, ''))) {
             this.errors.phone = 'Please enter a valid phone number'
           }
           break
+          
         case 'subject':
-          if (!this.form.subject.trim()) {
-            this.errors.subject = 'Subject is required'
+          if (!this.form.subject) {
+            this.errors.subject = 'Please select a subject'
           }
           break
+          
+        case 'customSubject':
+          if (this.form.subject === 'other' && !this.form.customSubject.trim()) {
+            this.errors.customSubject = 'Custom subject is required'
+          }
+          break
+          
         case 'message':
           if (!this.form.message.trim()) {
             this.errors.message = 'Message is required'
           } else if (this.form.message.trim().length < 10) {
-            this.errors.message = 'Message must be at least 10 characters long'
-          } else if (this.characterCount > 1000) {
+            this.errors.message = 'Message must be at least 10 characters'
+          } else if (this.form.message.length > 1000) {
             this.errors.message = 'Message must be less than 1000 characters'
+          }
+          break
+          
+        case 'privacy':
+          if (!this.form.privacy) {
+            this.errors.privacy = 'You must agree to the privacy policy'
           }
           break
       }
     },
     
-    isValidEmail(email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      return emailRegex.test(email)
+    clearError(field) {
+      if (this.errors[field]) {
+        this.errors[field] = ''
+      }
     },
     
-    isValidPhone(phone) {
-      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
-      return phoneRegex.test(phone.replace(/\s/g, ''))
-    },
-    
-    updateCharacterCount() {
-      this.characterCount = this.form.message.length
-    },
-    
-    handleDragOver(e) {
-      e.preventDefault()
-      this.isDragOver = true
-    },
-    
-    handleDragLeave(e) {
-      e.preventDefault()
-      this.isDragOver = false
-    },
-    
-    handleDrop(e) {
-      e.preventDefault()
-      this.isDragOver = false
-      const files = Array.from(e.dataTransfer.files)
-      this.processFiles(files)
-    },
-    
-    handleFileSelect(e) {
-      const files = Array.from(e.target.files)
-      this.processFiles(files)
-    },
-    
-    processFiles(files) {
-      files.forEach(file => {
-        if (this.validateFile(file)) {
-          this.uploadedFiles.push(file)
-        }
-      })
-    },
-    
-    validateFile(file) {
+    handleFileUpload(event) {
+      const files = Array.from(event.target.files)
       const maxSize = 10 * 1024 * 1024 // 10MB
-      const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'text/plain',
-        'image/jpeg',
-        'image/jpg',
-        'image/png',
-        'image/gif'
-      ]
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'image/jpeg', 'image/jpg', 'image/png', 'image/gif']
       
+      files.forEach(file => {
       if (file.size > maxSize) {
         alert(`File ${file.name} is too large. Maximum size is 10MB.`)
-        return false
+          return
       }
       
       if (!allowedTypes.includes(file.type)) {
-        alert(`File ${file.name} is not a supported format.`)
-        return false
+          alert(`File ${file.name} has an unsupported format.`)
+          return
       }
       
-      return true
+        this.uploadedFiles.push(file)
+      })
     },
     
     removeFile(index) {
       this.uploadedFiles.splice(index, 1)
     },
     
-    getFileIcon(fileType) {
-      if (fileType.includes('pdf')) return 'fas fa-file-pdf'
-      if (fileType.includes('word')) return 'fas fa-file-word'
-      if (fileType.includes('text')) return 'fas fa-file-alt'
-      if (fileType.includes('image')) return 'fas fa-file-image'
-      return 'fas fa-file'
-    },
-    
-    formatFileSize(bytes) {
-      if (bytes === 0) return '0 Bytes'
-      const k = 1024
-      const sizes = ['Bytes', 'KB', 'MB', 'GB']
-      const i = Math.floor(Math.log(bytes) / Math.log(k))
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-    },
-    
     async submitForm() {
       // Validate all fields
       Object.keys(this.form).forEach(field => {
-        if (field !== 'newsletter' && field !== 'privacyAgreed') {
+        if (field !== 'budget' && field !== 'timeline' && field !== 'phone') {
           this.validateField(field)
         }
       })
       
-      if (!this.form.privacyAgreed) {
-        this.errors.privacyAgreed = 'You must agree to the privacy policy and terms of service'
-      }
-      
-      if (Object.values(this.errors).some(error => error)) {
+      if (!this.isFormValid) {
         return
       }
       
       this.isSubmitting = true
-      this.showError = false
       
       try {
-        const formData = new FormData()
-        
-        // Add form fields
-        Object.keys(this.form).forEach(key => {
-          if (key !== 'newsletter' && key !== 'privacyAgreed') {
-            formData.append(key, this.form[key])
-          }
-        })
-        
-        // Add files
-        this.uploadedFiles.forEach(file => {
-          formData.append('attachments', file)
-        })
-        
-        const response = await fetch('/api/contact', {
-          method: 'POST',
-          body: formData
-        })
-        
-        if (!response.ok) {
-          throw new Error('Network error')
-        }
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 2000))
         
         // Reset form
-        this.form = {
-          name: '',
-          email: '',
-          phone: '',
-          subject: '',
-          message: '',
-          meetingDate: '',
-          meetingTime: '',
-          projectType: '',
-          budget: '',
-          newsletter: false,
-          privacyAgreed: false
-        }
-        this.uploadedFiles = []
-        this.characterCount = 0
-        
+        this.resetForm()
         this.showSuccess = true
+        
+        // Hide success message after 5 seconds
         setTimeout(() => {
           this.showSuccess = false
         }, 5000)
         
       } catch (error) {
         console.error('Error submitting form:', error)
-        this.showError = true
-        this.errorMessage = 'There was an error sending your message. Please try again.'
+        alert('There was an error sending your message. Please try again.')
       } finally {
         this.isSubmitting = false
+      }
+    },
+    
+    resetForm() {
+        this.form = {
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+        customSubject: '',
+          message: '',
+          budget: '',
+        timeline: '',
+        privacy: false
+        }
+      this.errors = {}
+        this.uploadedFiles = []
+      if (this.$refs.fileInput) {
+        this.$refs.fileInput.value = ''
       }
     }
   }
@@ -705,360 +551,406 @@ export default {
 
 <style scoped>
 .enhanced-contact-form {
-  padding-top: 100px;
-  min-height: 100vh;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
-.page-header {
-  background: linear-gradient(135deg, var(--primary-color), var(--info-color));
-  color: white;
-  margin: -20px -15px 0;
-  border-radius: 0 0 20px 20px;
-}
-
-.contact-info-card,
-.contact-form-card {
+.form-container {
   background: var(--card-bg);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.form-title {
   color: var(--text-color);
-  border: none;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-}
-
-.contact-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 15px;
-}
-
-.contact-icon {
-  width: 40px;
-  height: 40px;
-  background: rgba(0, 123, 255, 0.1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.contact-details h6 {
-  margin-bottom: 5px;
+  margin-bottom: 1rem;
+  font-size: 2rem;
   font-weight: 600;
 }
 
-.contact-details a {
-  color: var(--text-color);
-  transition: color 0.3s ease;
-}
-
-.contact-details a:hover {
-  color: var(--primary-color);
-}
-
-.social-links {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-
-.social-link {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  background: var(--primary-color);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  transition: all 0.3s ease;
+.form-subtitle {
+  color: var(--secondary-color);
   font-size: 1.1rem;
+  margin: 0;
 }
 
-.social-link:hover {
-  background: var(--dark-color);
-  transform: translateY(-3px);
-  color: white;
-}
-
-.form-control-custom {
-  border: 2px solid #e9ecef;
-  border-radius: 10px;
-  padding: 15px;
-  transition: all 0.3s ease;
-  background: var(--body-bg);
-  color: var(--text-color);
-}
-
-.form-control-custom:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.form-control-custom.is-invalid {
-  border-color: var(--danger-color);
-}
-
-.character-count {
-  text-align: right;
-  font-size: 0.8rem;
-  color: var(--secondary-color);
-  margin-top: 5px;
-}
-
-/* File Upload Styles */
-.file-upload-area {
-  border: 2px dashed var(--border-color);
-  border-radius: 15px;
-  padding: 40px 20px;
-  text-align: center;
-  transition: all 0.3s ease;
-  background: var(--body-bg);
-}
-
-.file-upload-area.drag-over {
-  border-color: var(--primary-color);
-  background: rgba(0, 123, 255, 0.05);
-}
-
-.file-upload-area.has-files {
-  border-color: var(--success-color);
-  background: rgba(40, 167, 69, 0.05);
-}
-
-.upload-content i {
-  font-size: 3rem;
-  color: var(--primary-color);
-  margin-bottom: 15px;
-}
-
-.upload-content p {
-  margin-bottom: 10px;
-  color: var(--text-color);
-}
-
-.upload-btn {
-  background: none;
-  border: none;
-  color: var(--primary-color);
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.upload-content small {
-  color: var(--secondary-color);
-}
-
-.file-list {
-  margin-top: 20px;
-}
-
-.file-item {
+.contact-form {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  background: rgba(0, 123, 255, 0.05);
-  border-radius: 10px;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.file-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.file-info i {
-  font-size: 1.5rem;
-  color: var(--primary-color);
-}
-
-.file-details {
+.form-group {
   display: flex;
   flex-direction: column;
 }
 
-.file-name {
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
   font-weight: 500;
   color: var(--text-color);
 }
 
-.file-size {
+.input-wrapper {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 45px 12px 15px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-input.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.form-input.success {
+  border-color: #28a745;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+.input-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #28a745;
+}
+
+.input-icon i.fa-exclamation-triangle {
+  color: #dc3545;
+}
+
+.textarea-wrapper {
+  position: relative;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 120px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-textarea.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.form-textarea.success {
+  border-color: #28a745;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+.textarea-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.char-count {
   font-size: 0.8rem;
   color: var(--secondary-color);
 }
 
-.remove-file {
-  background: var(--danger-color);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
+.char-count.warning {
+  color: #ffc107;
+}
+
+.error-message {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  color: #dc3545;
+  font-size: 0.9rem;
+}
+
+.budget-options,
+.timeline-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.budget-option,
+.timeline-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 10px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.budget-option:hover,
+.timeline-option:hover {
+  border-color: var(--primary-color);
+  background: rgba(0, 123, 255, 0.05);
+}
+
+.budget-radio,
+.timeline-radio {
+  margin: 0;
+}
+
+.budget-label,
+.timeline-label {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.file-upload {
+  position: relative;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.file-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.file-label:hover {
+  border-color: var(--primary-color);
+  background: rgba(0, 123, 255, 0.05);
+}
+
+.file-label i {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.file-label span {
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.file-label small {
+  color: var(--secondary-color);
+}
+
+.uploaded-files {
+  margin-top: 1rem;
+}
+
+.uploaded-file {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.uploaded-file i {
+  color: #28a745;
+}
+
+.uploaded-file span {
+  flex: 1;
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+.remove-file {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
   transition: all 0.3s ease;
 }
 
 .remove-file:hover {
-  background: #c82333;
-  transform: scale(1.1);
+  background: rgba(220, 53, 69, 0.1);
 }
 
-/* Calendar Section */
-.calendar-section {
-  background: rgba(0, 123, 255, 0.05);
-  padding: 20px;
-  border-radius: 10px;
-}
-
-.timezone-info {
-  margin-top: 10px;
-  text-align: center;
-}
-
-.timezone-info i {
-  color: var(--primary-color);
-}
-
-/* Project Type Grid */
-.project-type-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-}
-
-.project-type-option {
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
   cursor: pointer;
 }
 
-.project-type-input {
-  display: none;
-}
-
-.project-type-card {
-  padding: 20px;
-  border: 2px solid var(--border-color);
-  border-radius: 10px;
-  text-align: center;
-  transition: all 0.3s ease;
-  background: var(--body-bg);
-}
-
-.project-type-card:hover {
-  border-color: var(--primary-color);
-  background: rgba(0, 123, 255, 0.05);
-}
-
-.project-type-input:checked + .project-type-card {
-  border-color: var(--primary-color);
-  background: var(--primary-color);
-  color: white;
-}
-
-.project-type-card i {
-  font-size: 2rem;
-  margin-bottom: 10px;
-  display: block;
-}
-
-.project-type-card span {
-  font-weight: 500;
-}
-
-.loading {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255,255,255,.3);
-  border-radius: 50%;
-  border-top-color: #fff;
-  animation: spin 1s ease-in-out infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.additional-info {
-  background: var(--card-bg);
-  color: var(--text-color);
-}
-
-.info-item {
-  padding: 20px;
-  background: rgba(0, 123, 255, 0.05);
-  border-radius: 15px;
-  transition: all 0.3s ease;
-}
-
-.info-item:hover {
-  background: rgba(0, 123, 255, 0.1);
-  transform: translateY(-5px);
-}
-
-.info-icon {
-  margin-bottom: 15px;
-}
-
-.response-time {
-  background: var(--light-color);
-  padding: 40px;
-  border-radius: 15px;
-}
-
-.stat-item {
-  padding: 20px;
-  background: rgba(0, 123, 255, 0.05);
-  border-radius: 15px;
-  transition: all 0.3s ease;
-}
-
-.stat-item:hover {
-  background: rgba(0, 123, 255, 0.1);
-  transform: translateY(-5px);
-}
-
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-  padding: 20px;
-}
-
-.modal-content {
-  background: var(--card-bg);
-  border-radius: 15px;
-  max-width: 500px;
-  width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-  padding: 20px 30px;
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h4 {
+.checkbox-input {
   margin: 0;
-  color: var(--text-color);
+  margin-top: 0.25rem;
 }
 
-.modal-close {
+.checkbox-text {
+  font-size: 0.9rem;
+  color: var(--text-color);
+  line-height: 1.4;
+}
+
+.checkbox-text a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.checkbox-text a:hover {
+  text-decoration: underline;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.submit-btn {
+  padding: 12px 30px;
+  background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submit-btn.loading {
+  background: var(--secondary-color);
+}
+
+.reset-btn {
+  padding: 12px 20px;
+  background: transparent;
+  color: var(--text-color);
+  border: 2px solid var(--border-color);
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reset-btn:hover:not(:disabled) {
+  background: var(--secondary-bg);
+  border-color: var(--secondary-color);
+}
+
+.reset-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.success-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  max-width: 400px;
+  width: 90%;
+}
+
+.success-content {
+  text-align: center;
+  position: relative;
+}
+
+.success-content i {
+  font-size: 3rem;
+  color: #28a745;
+  margin-bottom: 1rem;
+}
+
+.success-content h3 {
+  color: var(--text-color);
+  margin-bottom: 1rem;
+}
+
+.success-content p {
+  color: var(--secondary-color);
+  margin-bottom: 1rem;
+}
+
+.close-success {
+  position: absolute;
+  top: -10px;
+  right: -10px;
   background: var(--secondary-color);
   color: white;
   border: none;
@@ -1071,39 +963,107 @@ export default {
   cursor: pointer;
 }
 
-.modal-body {
-  padding: 30px;
+.privacy-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
 }
 
-.modal-body p {
+.privacy-content {
+  background: var(--card-bg);
+  border-radius: 15px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.privacy-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.privacy-header h3 {
+  margin: 0;
   color: var(--text-color);
-  line-height: 1.6;
 }
 
+.close-modal {
+  background: none;
+  border: none;
+  color: var(--secondary-color);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.close-modal:hover {
+  background: var(--secondary-bg);
+}
+
+.privacy-body {
+  padding: 1.5rem;
+}
+
+.privacy-body h4 {
+  color: var(--text-color);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.privacy-body ul {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.privacy-body li {
+  color: var(--secondary-color);
+  margin-bottom: 0.5rem;
+}
+
+.privacy-body p {
+  color: var(--secondary-color);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .page-header {
-    margin: -20px -15px 0;
+  .enhanced-contact-form {
+    padding: 1rem;
   }
   
-  .contact-item {
+  .form-container {
+    padding: 1.5rem;
+  }
+  
+  .budget-options,
+  .timeline-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
     flex-direction: column;
-    text-align: center;
   }
   
-  .contact-icon {
-    align-self: center;
-  }
-  
-  .social-links {
+  .submit-btn,
+  .reset-btn {
+    width: 100%;
     justify-content: center;
-  }
-  
-  .project-type-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .response-time {
-    padding: 30px 20px;
   }
 }
 </style>
