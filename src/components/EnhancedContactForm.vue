@@ -190,8 +190,8 @@
                   </div>
                 </div>
 
-        <!-- Budget Range -->
-        <div class="form-group">
+        <!-- Budget Range - Hidden -->
+        <!-- <div class="form-group">
           <label class="form-label">
             <i class="fas fa-dollar-sign"></i>
             Budget Range (Optional)
@@ -207,10 +207,10 @@
               <span class="budget-label">{{ budget.label }}</span>
             </label>
                   </div>
-                </div>
+                </div> -->
 
-        <!-- Timeline -->
-        <div class="form-group">
+        <!-- Timeline - Hidden -->
+        <!-- <div class="form-group">
           <label class="form-label">
             <i class="fas fa-clock"></i>
             Project Timeline (Optional)
@@ -226,10 +226,10 @@
               <span class="timeline-label">{{ timeline.label }}</span>
                     </label>
                   </div>
-                </div>
+                </div> -->
 
-        <!-- File Upload -->
-        <div class="form-group">
+        <!-- File Upload - Hidden -->
+        <!-- <div class="form-group">
           <label for="file" class="form-label">
             <i class="fas fa-paperclip"></i>
             Attach Files (Optional)
@@ -259,7 +259,7 @@
               </button>
             </div>
           </div>
-                </div>
+                </div> -->
 
         <!-- Privacy Notice -->
         <div class="form-group">
@@ -367,31 +367,31 @@ export default {
         subject: '',
         customSubject: '',
         message: '',
-        budget: '',
-        timeline: '',
+        // budget: '', // Hidden field
+        // timeline: '', // Hidden field
         privacy: false
       },
       errors: {},
       isSubmitting: false,
       showSuccess: false,
       showPrivacyModal: false,
-      uploadedFiles: [],
-      budgetOptions: [
-        { value: 'under-5k', label: 'Under $5,000' },
-        { value: '5k-10k', label: '$5,000 - $10,000' },
-        { value: '10k-25k', label: '$10,000 - $25,000' },
-        { value: '25k-50k', label: '$25,000 - $50,000' },
-        { value: '50k-plus', label: '$50,000+' },
-        { value: 'discuss', label: 'Let\'s discuss' }
-      ],
-      timelineOptions: [
-        { value: 'asap', label: 'ASAP' },
-        { value: '1-month', label: 'Within 1 month' },
-        { value: '2-3-months', label: '2-3 months' },
-        { value: '3-6-months', label: '3-6 months' },
-        { value: '6-months-plus', label: '6+ months' },
-        { value: 'flexible', label: 'Flexible' }
-      ]
+      uploadedFiles: []
+      // budgetOptions: [ // Hidden fields - commented out
+      //   { value: 'under-5k', label: 'Under $5,000' },
+      //   { value: '5k-10k', label: '$5,000 - $10,000' },
+      //   { value: '10k-25k', label: '$10,000 - $25,000' },
+      //   { value: '25k-50k', label: '$25,000 - $50,000' },
+      //   { value: '50k-plus', label: '$50,000+' },
+      //   { value: 'discuss', label: 'Let\'s discuss' }
+      // ],
+      // timelineOptions: [
+      //   { value: 'asap', label: 'ASAP' },
+      //   { value: '1-month', label: 'Within 1 month' },
+      //   { value: '2-3-months', label: '2-3 months' },
+      //   { value: '3-6-months', label: '3-6 months' },
+      //   { value: '6-months-plus', label: '6+ months' },
+      //   { value: 'flexible', label: 'Flexible' }
+      // ]
     }
   },
   computed: {
@@ -535,8 +535,8 @@ export default {
           subject: '',
         customSubject: '',
           message: '',
-          budget: '',
-        timeline: '',
+          // budget: '', // Hidden field
+          // timeline: '', // Hidden field
         privacy: false
         }
       this.errors = {}
