@@ -9,7 +9,19 @@
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run --environment jsdom"
+    "test": "vitest run --environment jsdom",
+    "test:watch": "vitest --environment jsdom",
+    "test:ui": "vitest --ui",
+    "lint": "echo 'Linting not configured'",
+    "lint:fix": "echo 'Lint fix not configured'",
+    "type-check": "vue-tsc --noEmit",
+    "analyze": "vite-bundle-analyzer dist",
+    "docker:build": "docker build -t portfolio-frontend .",
+    "docker:run": "docker run -p 2025:80 portfolio-frontend",
+    "docker:compose": "docker-compose up -d",
+    "docker:compose:down": "docker-compose down",
+    "deploy:staging": "echo 'Staging deployment not configured'",
+    "deploy:production": "echo 'Production deployment not configured'"
   },
   "dependencies": {
     "@vueuse/motion": "^3.0.3",
