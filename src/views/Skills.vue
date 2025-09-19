@@ -158,15 +158,19 @@ export default {
   computed: {
     skillCategories() {
       const categories = {}
-      this.skills.forEach(skill => {
-        if (!categories[skill.category]) {
-          categories[skill.category] = {
-            name: skill.category,
-            skills: [],
-            icon: this.getCategoryIcon(skill.category)
-          }
+      // Convert the skills object structure to categories
+      Object.keys(this.skills).forEach(categoryKey => {
+        const categoryName = this.formatCategoryName(categoryKey)
+        categories[categoryName] = {
+          name: categoryName,
+          skills: this.skills[categoryKey].map(skill => ({
+            ...skill,
+            category: categoryName,
+            experience: skill.years || '2+ years',
+            description: `Proficient in ${skill.name} with ${skill.years || '2+'} years of experience`
+          })),
+          icon: this.getCategoryIcon(categoryName)
         }
-        categories[skill.category].skills.push(skill)
       })
       
       return Object.values(categories).map((category, index) => ({
@@ -176,6 +180,20 @@ export default {
     }
   },
   methods: {
+    formatCategoryName(categoryKey) {
+      const categoryMap = {
+        'backend': 'Backend',
+        'frontend': 'Frontend',
+        'database': 'Database',
+        'tools': 'Tools',
+        'cloud': 'Cloud',
+        'messaging': 'Messaging',
+        'testing': 'Testing',
+        'mobile': 'Mobile'
+      }
+      return categoryMap[categoryKey] || categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)
+    },
+    
     getCategoryIcon(category) {
       const icons = {
         'Frontend': 'fas fa-paint-brush',
@@ -185,7 +203,8 @@ export default {
         'Mobile': 'fas fa-mobile-alt',
         'Tools': 'fas fa-tools',
         'Cloud': 'fas fa-cloud',
-        'Testing': 'fas fa-bug'
+        'Testing': 'fas fa-bug',
+        'Messaging': 'fas fa-comments'
       }
       return icons[category] || 'fas fa-code'
     },

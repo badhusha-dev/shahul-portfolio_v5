@@ -317,20 +317,26 @@ export default {
   },
   computed: {
     sortedSkills() {
-      return [...this.skills].sort((a, b) => b.level - a.level)
+      const flatSkills = this.flattenSkills()
+      return [...flatSkills].sort((a, b) => b.level - a.level)
     },
     categories() {
-      return [...new Set(this.skills.map(skill => skill.category))]
+      return [...new Set(this.flattenSkills().map(skill => skill.category))].sort()
+    },
+    uniqueTechnologies() {
+      return this.flattenSkills().map(skill => skill.name).sort()
     },
     averageLevel() {
-      const total = this.skills.reduce((sum, skill) => sum + skill.level, 0)
-      return Math.round(total / this.skills.length)
+      const flatSkills = this.flattenSkills()
+      const total = flatSkills.reduce((sum, skill) => sum + skill.level, 0)
+      return Math.round(total / flatSkills.length)
     },
     expertSkills() {
-      return this.skills.filter(skill => skill.level >= 80)
+      return this.flattenSkills().filter(skill => skill.level >= 80)
     },
     skillPolygonPoints() {
-      return this.skills.map((skill, index) => {
+      const flatSkills = this.flattenSkills()
+      return flatSkills.map((skill, index) => {
         const x = this.getSkillX(index)
         const y = this.getSkillY(index)
         return `${x},${y}`
@@ -342,7 +348,7 @@ export default {
     skillConnections() {
       // Define connections between related skills
       return [
-        { from: 'JavaScript', to: 'Vue.js' },
+        { from: 'JavaScript', to: 'React' },
         { from: 'JavaScript', to: 'Node.js' },
         { from: 'Java', to: 'Spring Boot' },
         { from: 'Spring Boot', to: 'Microservices' },
@@ -361,34 +367,70 @@ export default {
     }
   },
   methods: {
+    flattenSkills() {
+      const flatSkills = []
+      Object.keys(this.skills).forEach(categoryKey => {
+        const categoryName = this.formatCategoryName(categoryKey)
+        this.skills[categoryKey].forEach(skill => {
+          flatSkills.push({
+            ...skill,
+            category: categoryName,
+            experience: skill.years || '2+ years',
+            description: `Proficient in ${skill.name} with ${skill.years || '2+'} years of experience`
+          })
+        })
+      })
+      return flatSkills
+    },
+    
+    formatCategoryName(categoryKey) {
+      const categoryMap = {
+        'backend': 'Backend',
+        'frontend': 'Frontend',
+        'database': 'Database',
+        'tools': 'Tools',
+        'cloud': 'Cloud',
+        'messaging': 'Messaging',
+        'testing': 'Testing',
+        'mobile': 'Mobile'
+      }
+      return categoryMap[categoryKey] || categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)
+    },
+    
     getAxisX(index) {
-      const angle = (index * 2 * Math.PI) / this.skills.length
+      const flatSkills = this.flattenSkills()
+      const angle = (index * 2 * Math.PI) / flatSkills.length
       return this.chartSize/2 + Math.cos(angle) * (this.chartSize/2 - 50)
     },
     getAxisY(index) {
-      const angle = (index * 2 * Math.PI) / this.skills.length
+      const flatSkills = this.flattenSkills()
+      const angle = (index * 2 * Math.PI) / flatSkills.length
       return this.chartSize/2 + Math.sin(angle) * (this.chartSize/2 - 50)
     },
     getSkillX(index) {
-      const skill = this.skills[index]
-      const angle = (index * 2 * Math.PI) / this.skills.length
+      const flatSkills = this.flattenSkills()
+      const skill = flatSkills[index]
+      const angle = (index * 2 * Math.PI) / flatSkills.length
       const radius = (this.chartSize/2 - 50) * (skill.level / 100)
       return this.chartSize/2 + Math.cos(angle) * radius
     },
     getSkillY(index) {
-      const skill = this.skills[index]
-      const angle = (index * 2 * Math.PI) / this.skills.length
+      const flatSkills = this.flattenSkills()
+      const skill = flatSkills[index]
+      const angle = (index * 2 * Math.PI) / flatSkills.length
       const radius = (this.chartSize/2 - 50) * (skill.level / 100)
       return this.chartSize/2 + Math.sin(angle) * radius
     },
     getNetworkX(skill) {
-      const index = this.skills.indexOf(skill)
-      const angle = (index * 2 * Math.PI) / this.skills.length
+      const flatSkills = this.flattenSkills()
+      const index = flatSkills.indexOf(skill)
+      const angle = (index * 2 * Math.PI) / flatSkills.length
       return this.networkSize/2 + Math.cos(angle) * (this.networkSize/2 - 80)
     },
     getNetworkY(skill) {
-      const index = this.skills.indexOf(skill)
-      const angle = (index * 2 * Math.PI) / this.skills.length
+      const flatSkills = this.flattenSkills()
+      const index = flatSkills.indexOf(skill)
+      const angle = (index * 2 * Math.PI) / flatSkills.length
       return this.networkSize/2 + Math.sin(angle) * (this.networkSize/2 - 80)
     },
     getNodeSize(level) {
@@ -408,7 +450,7 @@ export default {
       return this.circumference - (level / 100) * this.circumference
     },
     getSkillByName(name) {
-      return this.skills.find(skill => skill.name === name)
+      return this.flattenSkills().find(skill => skill.name === name)
     },
     showTooltip(skill, event) {
       this.tooltip = {
