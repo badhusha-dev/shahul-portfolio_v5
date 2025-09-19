@@ -61,7 +61,8 @@ export default {
 .projects-page {
   padding-top: 100px;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--bg-color) 0%, var(--secondary-bg) 100%);
+  background: linear-gradient(135deg, var(--body-bg) 0%, var(--secondary-bg) 100%);
+  color: var(--text-color);
 }
 
 .page-header {
