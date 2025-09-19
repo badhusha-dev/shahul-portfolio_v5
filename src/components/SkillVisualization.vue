@@ -368,19 +368,26 @@ export default {
   },
   methods: {
     flattenSkills() {
-      const flatSkills = []
-      Object.keys(this.skills).forEach(categoryKey => {
-        const categoryName = this.formatCategoryName(categoryKey)
-        this.skills[categoryKey].forEach(skill => {
-          flatSkills.push({
-            ...skill,
-            category: categoryName,
-            experience: skill.years || '2+ years',
-            description: `Proficient in ${skill.name} with ${skill.years || '2+'} years of experience`
+      try {
+        console.log('SkillVisualization skills data:', this.skills)
+        const flatSkills = []
+        Object.keys(this.skills).forEach(categoryKey => {
+          const categoryName = this.formatCategoryName(categoryKey)
+          this.skills[categoryKey].forEach(skill => {
+            flatSkills.push({
+              ...skill,
+              category: categoryName,
+              experience: skill.years || '2+ years',
+              description: `Proficient in ${skill.name} with ${skill.years || '2+'} years of experience`
+            })
           })
         })
-      })
-      return flatSkills
+        console.log('Flattened skills:', flatSkills)
+        return flatSkills
+      } catch (error) {
+        console.error('Error in flattenSkills method:', error)
+        return []
+      }
     },
     
     formatCategoryName(categoryKey) {

@@ -157,26 +157,34 @@ export default {
   },
   computed: {
     skillCategories() {
-      const categories = {}
-      // Convert the skills object structure to categories
-      Object.keys(this.skills).forEach(categoryKey => {
-        const categoryName = this.formatCategoryName(categoryKey)
-        categories[categoryName] = {
-          name: categoryName,
-          skills: this.skills[categoryKey].map(skill => ({
-            ...skill,
-            category: categoryName,
-            experience: skill.years || '2+ years',
-            description: `Proficient in ${skill.name} with ${skill.years || '2+'} years of experience`
-          })),
-          icon: this.getCategoryIcon(categoryName)
-        }
-      })
-      
-      return Object.values(categories).map((category, index) => ({
-        ...category,
-        index
-      }))
+      try {
+        console.log('Skills data:', this.skills)
+        const categories = {}
+        // Convert the skills object structure to categories
+        Object.keys(this.skills).forEach(categoryKey => {
+          const categoryName = this.formatCategoryName(categoryKey)
+          categories[categoryName] = {
+            name: categoryName,
+            skills: this.skills[categoryKey].map(skill => ({
+              ...skill,
+              category: categoryName,
+              experience: skill.years || '2+ years',
+              description: `Proficient in ${skill.name} with ${skill.years || '2+'} years of experience`
+            })),
+            icon: this.getCategoryIcon(categoryName)
+          }
+        })
+        
+        const result = Object.values(categories).map((category, index) => ({
+          ...category,
+          index
+        }))
+        console.log('Skill categories result:', result)
+        return result
+      } catch (error) {
+        console.error('Error in skillCategories computed property:', error)
+        return []
+      }
     }
   },
   methods: {
