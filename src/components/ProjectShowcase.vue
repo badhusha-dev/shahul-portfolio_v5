@@ -465,10 +465,15 @@ export default {
   background: var(--card-bg);
   border-radius: 15px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .search-container {
-  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0;
 }
 
 .search-input-wrapper {
@@ -525,6 +530,7 @@ export default {
   gap: 1rem;
   align-items: center;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .filter-group {
@@ -628,8 +634,10 @@ export default {
 /* Projects Container */
 .projects-container.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2rem;
+  justify-items: center;
+  align-items: start;
 }
 
 .projects-container.list {
@@ -654,6 +662,10 @@ export default {
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   height: 100%;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
 }
 
 .project-card:hover {
@@ -754,6 +766,10 @@ export default {
 
 .project-content {
   padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .project-header {
@@ -1109,9 +1125,18 @@ export default {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .showcase-controls {
+    padding: 1rem;
+  }
+  
   .filter-controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .filter-group {
+    justify-content: space-between;
   }
   
   .view-toggle {
@@ -1121,6 +1146,15 @@ export default {
   
   .projects-container.grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .project-card {
+    max-width: 100%;
+  }
+  
+  .search-input-wrapper {
+    max-width: 100%;
   }
   
   .modal-header {
