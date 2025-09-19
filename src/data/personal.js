@@ -5,7 +5,7 @@ export const personalInfo = {
   email: "officialbadhusha@gmail.com",
   phone: "+60 11 3981 7889",
   location: "Petaling Jaya, Selangor, Malaysia",
-  linkedin: "https://linkedin.com/in/badhusha2000",
+  linkedin: "https://www.linkedin.com/in/badhusha2000/",
   github: "https://github.com/badhusha-dev",
   cv: "/cv/shahul_4YOE.pdf",
   bio: "Motivated Java Backend Developer with 4 years' experience designing scalable, secure enterprise applications. Proven track record in delivering high-performance solutions with Spring Boot, REST APIs, microservices, and AWS cloud integrations. Skilled in real-time data processing (Kafka), database optimization, and agile delivery.",

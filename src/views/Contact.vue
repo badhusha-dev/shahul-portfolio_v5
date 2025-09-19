@@ -26,8 +26,8 @@
               </div>
               <div class="info-content">
                 <h4>Email</h4>
-                <p>shahulhameed.ansari@gmail.com</p>
-                <a href="mailto:shahulhameed.ansari@gmail.com" class="info-link">
+                <p>{{ personalInfo.email }}</p>
+                <a :href="`mailto:${personalInfo.email}`" class="info-link">
                   Send Email <i class="fas fa-external-link-alt"></i>
                 </a>
               </div>
@@ -40,7 +40,7 @@
               <div class="info-content">
                 <h4>LinkedIn</h4>
                 <p>Professional Network</p>
-                <a href="https://linkedin.com/in/shahulhameedansari" target="_blank" class="info-link">
+                <a :href="personalInfo.linkedin" target="_blank" class="info-link">
                   Connect <i class="fas fa-external-link-alt"></i>
                 </a>
               </div>
@@ -92,11 +92,17 @@
 
 <script>
 import EnhancedContactForm from '../components/EnhancedContactForm.vue'
+import { personalInfo } from '../data/personal.js'
 
 export default {
   name: 'Contact',
   components: {
     EnhancedContactForm
+  },
+  data() {
+    return {
+      personalInfo
+    }
   }
 }
 </script>

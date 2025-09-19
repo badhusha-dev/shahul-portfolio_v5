@@ -1174,7 +1174,6 @@ export default {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-}
   
   .modal-header {
     flex-direction: column;
