@@ -25,7 +25,7 @@ const routes = [
   { path: '/experience', name: 'Experience', component: Experience },
   { path: '/projects', name: 'Projects', component: Projects },
   { path: '/skills', name: 'Skills', component: Skills },
-  { path: '/contact', name: 'Contact', component: Contact }
+  { path: '/contact', name: 'Contact', component: Contact },
   // Blog route commented out - page hidden from navigation but component kept
   // { path: '/blog', name: 'Blog', component: Blog }
 ]
