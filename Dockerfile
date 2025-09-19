@@ -1,5 +1,5 @@
 # Multi-stage build for Vue.js frontend
-FROM node:18-alpine as build-stage
+FROM node:20-alpine AS build-stage
 
 # Set working directory
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Production stage with nginx
-FROM nginx:alpine as production-stage
+FROM nginx:alpine AS production-stage
 
 # Install wget for health checks (smaller than curl)
 RUN apk add --no-cache wget
