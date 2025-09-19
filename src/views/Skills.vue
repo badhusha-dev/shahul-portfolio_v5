@@ -158,7 +158,6 @@ export default {
   computed: {
     skillCategories() {
       try {
-        console.log('Skills data:', this.skills)
         const categories = {}
         // Convert the skills object structure to categories
         Object.keys(this.skills).forEach(categoryKey => {
@@ -175,12 +174,10 @@ export default {
           }
         })
         
-        const result = Object.values(categories).map((category, index) => ({
+        return Object.values(categories).map((category, index) => ({
           ...category,
           index
         }))
-        console.log('Skill categories result:', result)
-        return result
       } catch (error) {
         console.error('Error in skillCategories computed property:', error)
         return []

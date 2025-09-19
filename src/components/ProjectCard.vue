@@ -1,5 +1,5 @@
 <template>
-  <div class="project-card card card-custom h-100" @click="openModal">
+  <div class="project-card card card-custom h-100" @click="openModal" v-bind="$attrs">
     <img :src="project.image" class="card-img-top project-image" :alt="project.title">
     <div class="card-body d-flex flex-column">
       <h5 class="card-title">{{ project.title }}</h5>
@@ -112,6 +112,7 @@
 <script>
 export default {
   name: 'ProjectCard',
+  inheritAttrs: false,
   props: {
     project: {
       type: Object,

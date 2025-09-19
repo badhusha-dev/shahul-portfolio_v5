@@ -236,9 +236,9 @@ export class PerformanceOptimizer {
       '/about': ['/experience', '/skills'],
       '/projects': ['/skills', '/contact'],
       '/skills': ['/experience', '/contact'],
-      '/experience': ['/contact', '/blog'],
-      '/contact': ['/blog', '/'],
-      '/blog': ['/contact', '/']
+      '/experience': ['/contact'],
+      '/contact': ['/']
+      // '/blog': ['/contact', '/'] // Blog route hidden
     }
     
     return pageMap[currentPath] || []

@@ -369,7 +369,6 @@ export default {
   methods: {
     flattenSkills() {
       try {
-        console.log('SkillVisualization skills data:', this.skills)
         const flatSkills = []
         Object.keys(this.skills).forEach(categoryKey => {
           const categoryName = this.formatCategoryName(categoryKey)
@@ -382,7 +381,6 @@ export default {
             })
           })
         })
-        console.log('Flattened skills:', flatSkills)
         return flatSkills
       } catch (error) {
         console.error('Error in flattenSkills method:', error)
@@ -417,6 +415,7 @@ export default {
     getSkillX(index) {
       const flatSkills = this.flattenSkills()
       const skill = flatSkills[index]
+      if (!skill) return 0
       const angle = (index * 2 * Math.PI) / flatSkills.length
       const radius = (this.chartSize/2 - 50) * (skill.level / 100)
       return this.chartSize/2 + Math.cos(angle) * radius
@@ -424,6 +423,7 @@ export default {
     getSkillY(index) {
       const flatSkills = this.flattenSkills()
       const skill = flatSkills[index]
+      if (!skill) return 0
       const angle = (index * 2 * Math.PI) / flatSkills.length
       const radius = (this.chartSize/2 - 50) * (skill.level / 100)
       return this.chartSize/2 + Math.sin(angle) * radius
