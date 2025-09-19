@@ -1,5 +1,5 @@
 <template>
-  <div id="app" :class="themeClass">
+  <div id="app" :class="[themeClass, { 'theme-transitioning': themeTransition }]">
     <Navbar />
     <main>
       <router-view v-slot="{ Component, route }">
@@ -11,6 +11,12 @@
     <Footer />
     <ThemeToggle :current-theme="currentTheme" @update-theme="setTheme" />
     
+    <!-- Analytics Dashboard -->
+    <AnalyticsDashboard 
+      :show="showAnalytics" 
+      @close="showAnalytics = false"
+    />
+    
     <!-- Scroll to Top Button -->
     <button 
       class="scroll-to-top"
@@ -20,6 +26,15 @@
     >
       <i class="fas fa-chevron-up"></i>
     </button>
+
+    <!-- Analytics Toggle Button -->
+    <button 
+      class="analytics-toggle"
+      @click="toggleAnalytics"
+      title="Toggle Analytics Dashboard (Ctrl+K)"
+    >
+      <i class="fas fa-chart-line"></i>
+    </button>
   </div>
 </template>
 
@@ -28,17 +43,22 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
 import ThemeToggle from './components/ThemeToggle.vue'
+import AnalyticsDashboard from './components/AnalyticsDashboard.vue'
+import { analytics } from './utils/analytics.js'
 
 export default {
   name: 'App',
   components: {
     Navbar,
     Footer,
-    ThemeToggle
+    ThemeToggle,
+    AnalyticsDashboard
   },
   setup() {
     const currentTheme = ref('light')
     const showScrollToTop = ref(false)
+    const showAnalytics = ref(false)
+    const themeTransition = ref(false)
 
     const themeClass = computed(() => {
       return `theme-${currentTheme.value}`
@@ -48,12 +68,25 @@ export default {
       const savedTheme = localStorage.getItem('portfolio-theme')
       if (savedTheme) {
         currentTheme.value = savedTheme
+      } else {
+        // Check system preference if no saved theme
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          currentTheme.value = 'dark'
+        }
       }
     }
 
     const setTheme = (theme) => {
-      currentTheme.value = theme
-      localStorage.setItem('portfolio-theme', theme)
+      themeTransition.value = true
+      
+      setTimeout(() => {
+        currentTheme.value = theme
+        localStorage.setItem('portfolio-theme', theme)
+        
+        setTimeout(() => {
+          themeTransition.value = false
+        }, 300)
+      }, 150)
     }
 
     const handleScroll = () => {
@@ -67,13 +100,79 @@ export default {
       })
     }
 
+    const toggleAnalytics = () => {
+      showAnalytics.value = !showAnalytics.value
+    }
+
+    const checkContentVisibility = () => {
+      const main = document.querySelector('main')
+      const routerView = document.querySelector('.router-view')
+      const currentPage = document.querySelector('.home-page, .about-page, .projects-page, .experience-page, .skills-page, .contact-page, .blog-page')
+      
+      console.log('🔍 Content Visibility Check:')
+      console.log('Main element:', main ? '✅ Found' : '❌ Missing')
+      console.log('Router view:', routerView ? '✅ Found' : '❌ Missing')
+      console.log('Current page:', currentPage ? '✅ Found' : '❌ Missing')
+      
+      if (!currentPage) {
+        console.warn('⚠️ No page content found! This might indicate a loading issue.')
+        // Force re-render
+        setTimeout(() => {
+          window.location.reload()
+        }, 2000)
+      }
+    }
+
+    const handleKeydown = (e) => {
+      // Keyboard shortcuts
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 'k':
+            e.preventDefault()
+            toggleAnalytics()
+            break
+          case '1':
+            e.preventDefault()
+            setTheme('light')
+            break
+          case '2':
+            e.preventDefault()
+            setTheme('dark')
+            break
+          case '3':
+            e.preventDefault()
+            setTheme('blue')
+            break
+          case '4':
+            e.preventDefault()
+            setTheme('green')
+            break
+        }
+      }
+    }
+
     onMounted(() => {
       loadTheme()
       window.addEventListener('scroll', handleScroll)
+      window.addEventListener('keydown', handleKeydown)
+      
+      // Initialize analytics
+      analytics.loadFromStorage()
+      analytics.startTracking()
+      
+      // Track page view
+      analytics.trackPageView(window.location.pathname)
+      
+      // Debug: Check content visibility
+      setTimeout(() => {
+        checkContentVisibility()
+      }, 500)
     })
 
     onUnmounted(() => {
       window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('keydown', handleKeydown)
+      analytics.stopTracking()
     })
 
     return {
@@ -81,7 +180,11 @@ export default {
       currentTheme,
       setTheme,
       showScrollToTop,
-      scrollToTop
+      scrollToTop,
+      showAnalytics,
+      themeTransition,
+      toggleAnalytics,
+      checkContentVisibility
     }
   }
 }
@@ -152,6 +255,8 @@ body {
   color: var(--text-color);
   line-height: 1.6;
   transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 #app {
@@ -162,6 +267,9 @@ body {
 
 main {
   flex: 1;
+  min-height: calc(100vh - 80px);
+  position: relative;
+  z-index: 1;
 }
 
 /* Page transitions */
@@ -171,13 +279,13 @@ main {
 }
 
 .page-enter-from {
-  opacity: 0;
-  transform: translateY(20px);
+  opacity: 0.8;
+  transform: translateY(10px);
 }
 
 .page-leave-to {
-  opacity: 0;
-  transform: translateY(-20px);
+  opacity: 0.8;
+  transform: translateY(-10px);
 }
 
 /* Smooth scrolling */
@@ -257,10 +365,179 @@ html {
   }
 }
 
+/* Theme transitions */
+.theme-transitioning * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Analytics toggle button */
+.analytics-toggle {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.analytics-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background: var(--dark-color);
+}
+
+.analytics-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Enhanced scroll to top button */
+.scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 80px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  z-index: 1000;
+}
+
+.scroll-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.scroll-to-top:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background: var(--dark-color);
+}
+
+/* Keyboard shortcuts hint */
+.keyboard-hint {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.keyboard-hint h4 {
+  margin-bottom: 15px;
+  color: var(--text-color);
+}
+
+.keyboard-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.shortcut-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0, 123, 255, 0.1);
+  border-radius: 8px;
+}
+
+.shortcut-key {
+  background: var(--primary-color);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* Debug styles - remove in production */
+.debug-content-visibility {
+  border: 2px solid red !important;
+  background: rgba(255, 0, 0, 0.1) !important;
+}
+
+.debug-content-visibility * {
+  border: 1px solid blue !important;
+  background: rgba(0, 0, 255, 0.05) !important;
+}
+
+/* Ensure all content is visible */
+.container, .row, .col, [class*="col-"] {
+  min-height: auto;
+  overflow: visible;
+}
+
+/* Fix any potential z-index issues */
+.navbar-custom {
+  z-index: 1030;
+}
+
+.theme-toggle {
+  z-index: 1040;
+}
+
+.analytics-toggle,
+.scroll-to-top {
+  z-index: 1050;
+}
+
 /* Print styles */
 @media print {
   .no-print {
     display: none !important;
+  }
+  
+  .analytics-toggle,
+  .scroll-to-top,
+  .theme-toggle {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics-toggle {
+    bottom: 15px;
+    left: 15px;
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+  
+  .scroll-to-top {
+    bottom: 15px;
+    right: 70px;
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
   }
 }
 </style>
