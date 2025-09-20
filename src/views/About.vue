@@ -197,6 +197,8 @@ export default {
 .about-page {
   padding-top: 100px;
   min-height: 100vh;
+  background: var(--body-bg);
+  color: var(--text-color);
 }
 
 .page-header {

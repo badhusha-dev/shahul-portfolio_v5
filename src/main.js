@@ -26,7 +26,8 @@ const routes = [
   { path: '/projects', name: 'Projects', component: Projects },
   { path: '/skills', name: 'Skills', component: Skills },
   { path: '/contact', name: 'Contact', component: Contact },
-  { path: '/blog', name: 'Blog', component: Blog }
+  // Blog route commented out - page hidden from navigation but component kept
+  // { path: '/blog', name: 'Blog', component: Blog }
 ]
 
 const router = createRouter({

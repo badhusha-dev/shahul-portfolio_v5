@@ -3,167 +3,135 @@
     <div class="container">
       <!-- Page Header -->
       <div class="page-header text-center py-5">
-        <h1 class="display-4 fw-bold mb-3 animate__animated animate__fadeInDown">Skills & Expertise</h1>
-        <p class="lead animate__animated animate__fadeInUp animate__delay-1s">Technologies and tools I work with</p>
+        <h1 class="display-4 fw-bold mb-3 animate__animated animate__fadeInDown">
+          <span class="title-gradient">My Skills</span>
+        </h1>
+        <p class="lead animate__animated animate__fadeInUp animate__delay-1s">
+          A comprehensive overview of my technical expertise and proficiency levels
+        </p>
       </div>
 
-      <!-- Skills Overview -->
-      <div class="skills-overview mb-5">
-        <div class="row">
-          <div class="col-lg-3 col-md-6 mb-4" v-for="(category, categoryName) in skillsOverview" :key="categoryName">
-            <div class="overview-card text-center animate__animated animate__fadeInUp" :style="{ animationDelay: (Object.keys(skillsOverview).indexOf(categoryName) * 0.1) + 's' }">
-              <div class="overview-icon mb-3">
-                <i :class="category.icon" class="fas fa-3x text-primary"></i>
+      <!-- Interactive Skill Visualization -->
+      <SkillVisualization />
+
+      <!-- Skills by Category -->
+      <div class="skills-categories">
+        <h2 class="section-title animate__animated animate__fadeInUp">
+          <i class="fas fa-layer-group me-2"></i>
+          Skills by Category
+        </h2>
+        
+        <div class="categories-grid">
+          <div 
+            v-for="category in skillCategories" 
+            :key="category.name"
+            class="category-card animate__animated animate__fadeInUp"
+            :style="{ animationDelay: `${category.index * 0.1}s` }"
+          >
+            <div class="category-header">
+              <div class="category-icon">
+                <i :class="category.icon"></i>
               </div>
-              <h4>{{ categoryName.charAt(0).toUpperCase() + categoryName.slice(1) }}</h4>
-              <p class="text-muted">{{ category.count }} skills</p>
-              <div class="overview-skills">
+              <h3 class="category-title">{{ category.name }}</h3>
+              <div class="category-count">{{ category.skills.length }} skills</div>
+            </div>
+            
+            <div class="category-skills">
+              <div 
+                v-for="skill in category.skills" 
+                :key="skill.name"
+                class="skill-item"
+                @mouseenter="showSkillDetails(skill)"
+                @mouseleave="hideSkillDetails"
+              >
+                <div class="skill-info">
+                  <span class="skill-name">{{ skill.name }}</span>
+                  <span class="skill-level">{{ skill.level }}%</span>
+                </div>
+                <div class="skill-bar">
+                  <div 
+                    class="skill-progress"
+                    :style="{ 
+                      width: `${skill.level}%`,
+                      backgroundColor: getSkillColor(skill.level)
+                    }"
+                  ></div>
+                </div>
+                <div class="skill-experience">{{ skill.experience }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skill Details Modal -->
+      <div v-if="selectedSkill" class="skill-modal" @click="hideSkillDetails">
+        <div class="modal-content" @click.stop>
+          <button @click="hideSkillDetails" class="modal-close">
+            <i class="fas fa-times"></i>
+          </button>
+          
+          <div class="modal-header">
+            <div class="skill-icon-large">
+              <i :class="getSkillIcon(selectedSkill.name)"></i>
+            </div>
+            <div class="skill-info-large">
+              <h2>{{ selectedSkill.name }}</h2>
+              <p class="skill-category">{{ selectedSkill.category }}</p>
+              <div class="skill-level-large">
+                <div class="level-circle">
+                  <svg width="120" height="120" class="level-svg">
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="50"
+                      fill="none"
+                      stroke="var(--border-color)"
+                      stroke-width="8"
+                      opacity="0.3"
+                    />
+                    <circle
+                      cx="60"
+                      cy="60"
+                      r="50"
+                      fill="none"
+                      :stroke="getSkillColor(selectedSkill.level)"
+                      stroke-width="8"
+                      stroke-linecap="round"
+                      :stroke-dasharray="circumference"
+                      :stroke-dashoffset="getCircularOffset(selectedSkill.level)"
+                      class="level-progress"
+                    />
+                  </svg>
+                  <div class="level-text">{{ selectedSkill.level }}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="modal-body">
+            <div class="skill-description">
+              <h3>Description</h3>
+              <p>{{ selectedSkill.description }}</p>
+            </div>
+            
+            <div class="skill-experience">
+              <h3>Experience</h3>
+              <p>{{ selectedSkill.experience }}</p>
+            </div>
+            
+            <div class="skill-projects">
+              <h3>Related Projects</h3>
+              <div class="project-tags">
                 <span 
-                  v-for="skill in category.skills.slice(0, 3)" 
-                  :key="skill" 
-                  class="skill-tag"
+                  v-for="project in getRelatedProjects(selectedSkill.name)" 
+                  :key="project"
+                  class="project-tag"
                 >
-                  {{ skill }}
+                  {{ project }}
                 </span>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Skills Categories -->
-      <div class="skills-categories">
-        <div class="row">
-          <div 
-            v-for="(category, categoryName) in skills" 
-            :key="categoryName"
-            class="col-lg-6 mb-5"
-          >
-            <SkillCard 
-              :category="categoryName.charAt(0).toUpperCase() + categoryName.slice(1)"
-              :skills="category"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Skills Summary -->
-      <div class="row mt-5">
-        <div class="col-12">
-          <div class="card card-custom animate__animated animate__fadeInUp">
-            <div class="card-body">
-              <h3 class="card-title text-center mb-4">Skills Summary</h3>
-              <div class="row">
-                <div class="col-lg-3 col-md-6 mb-4">
-                  <div class="summary-item text-center">
-                    <div class="summary-icon mb-3">
-                      <i class="fas fa-code fa-3x text-primary"></i>
-                    </div>
-                    <h4>{{ totalSkills }}</h4>
-                    <p class="text-muted">Total Skills</p>
-                  </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                  <div class="summary-item text-center">
-                    <div class="summary-icon mb-3">
-                      <i class="fas fa-star fa-3x text-warning"></i>
-                    </div>
-                    <h4>{{ expertSkills }}</h4>
-                    <p class="text-muted">Expert Level (90%+)</p>
-                  </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                  <div class="summary-item text-center">
-                    <div class="summary-icon mb-3">
-                      <i class="fas fa-chart-line fa-3x text-success"></i>
-                    </div>
-                    <h4>{{ advancedSkills }}</h4>
-                    <p class="text-muted">Advanced Level (80%+)</p>
-                  </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                  <div class="summary-item text-center">
-                    <div class="summary-icon mb-3">
-                      <i class="fas fa-calendar-alt fa-3x text-info"></i>
-                    </div>
-                    <h4>{{ averageExperience }}</h4>
-                    <p class="text-muted">Avg. Experience</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Learning Journey -->
-      <div class="row mt-5">
-        <div class="col-12">
-          <h3 class="text-center mb-4">Learning Journey</h3>
-          <div class="card card-custom animate__animated animate__fadeInUp">
-            <div class="card-body">
-              <div class="learning-timeline">
-                <div 
-                  v-for="(phase, index) in learningJourney" 
-                  :key="index"
-                  class="learning-phase"
-                  :class="{ 'animate__animated animate__fadeInLeft': index % 2 === 0, 'animate__animated animate__fadeInRight': index % 2 === 1 }"
-                  :style="{ animationDelay: (index * 0.2) + 's' }"
-                >
-                  <div class="phase-year">{{ phase.year }}</div>
-                  <div class="phase-content">
-                    <h6>{{ phase.title }}</h6>
-                    <p>{{ phase.description }}</p>
-                    <div class="phase-skills">
-                      <span 
-                        v-for="skill in phase.skills" 
-                        :key="skill" 
-                        class="skill-tag"
-                      >
-                        {{ skill }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Certifications -->
-      <div class="row mt-5">
-        <div class="col-12">
-          <h3 class="text-center mb-4">Certifications & Achievements</h3>
-          <div class="row">
-            <div class="col-lg-4 col-md-6 mb-4" v-for="(cert, index) in certifications" :key="index">
-              <div class="certification-card card card-custom h-100 animate__animated animate__fadeInUp" :style="{ animationDelay: (index * 0.1) + 's' }">
-                <div class="card-body text-center">
-                  <div class="cert-icon mb-3">
-                    <i :class="cert.icon" class="fas fa-3x text-primary"></i>
-                  </div>
-                  <h5 class="card-title">{{ cert.title }}</h5>
-                  <p class="card-text">{{ cert.issuer }}</p>
-                  <small class="text-muted">{{ cert.date }}</small>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Call to Action -->
-      <div class="row mt-5">
-        <div class="col-12 text-center">
-          <div class="cta-section animate__animated animate__fadeInUp">
-            <h3 class="mb-3">Ready to Collaborate?</h3>
-            <p class="lead mb-4">Let's discuss how my skills can contribute to your project</p>
-            <router-link to="/contact" class="btn btn-primary-custom btn-custom me-3">
-              <i class="fas fa-envelope me-2"></i>Contact Me
-            </router-link>
-            <router-link to="/projects" class="btn btn-outline-custom btn-custom">
-              <i class="fas fa-code me-2"></i>View Projects
-            </router-link>
           </div>
         </div>
       </div>
@@ -172,138 +140,123 @@
 </template>
 
 <script>
-import SkillCard from '../components/SkillCard.vue'
+import SkillVisualization from '../components/SkillVisualization.vue'
 import { skills } from '../data/skills.js'
 
 export default {
   name: 'Skills',
   components: {
-    SkillCard
+    SkillVisualization
   },
   data() {
     return {
-      skills,
-      skillsOverview: {
-        backend: {
-          icon: 'fa-server',
-          count: skills.backend.length,
-          skills: skills.backend.map(skill => skill.name)
-        },
-        frontend: {
-          icon: 'fa-desktop',
-          count: skills.frontend.length,
-          skills: skills.frontend.map(skill => skill.name)
-        },
-        database: {
-          icon: 'fa-database',
-          count: skills.database.length,
-          skills: skills.database.map(skill => skill.name)
-        },
-        tools: {
-          icon: 'fa-tools',
-          count: skills.tools.length,
-          skills: skills.tools.map(skill => skill.name)
-        }
-      },
-      learningJourney: [
-        {
-          year: '2019',
-          title: 'Foundation',
-          description: 'Started with core Java programming and object-oriented concepts',
-          skills: ['Java 8', 'OOP', 'Data Structures', 'Algorithms']
-        },
-        {
-          year: '2020',
-          title: 'Web Development',
-          description: 'Learned Spring Framework and web application development',
-          skills: ['Spring MVC', 'Spring Boot', 'REST APIs', 'MySQL']
-        },
-        {
-          year: '2021',
-          title: 'Advanced Backend',
-          description: 'Mastered microservices architecture and cloud technologies',
-          skills: ['Spring Cloud', 'Docker', 'AWS', 'Microservices']
-        },
-        {
-          year: '2022',
-          title: 'DevOps & Cloud',
-          description: 'Explored containerization and cloud deployment strategies',
-          skills: ['Kubernetes', 'Jenkins', 'CI/CD', 'Linux']
-        },
-        {
-          year: '2023',
-          title: 'Modern Technologies',
-          description: 'Adopted modern Java features and advanced patterns',
-          skills: ['Java 11', 'GraphQL', 'Redis', 'Apache Kafka']
-        },
-        {
-          year: '2024',
-          title: 'Innovation & Leadership',
-          description: 'Leading teams and exploring cutting-edge technologies',
-          skills: ['Java 17', 'Quarkus', 'Apache Pulsar', 'Istio']
-        }
-      ],
-      certifications: [
-        {
-          title: 'Oracle Certified Java Developer',
-          issuer: 'Oracle Corporation',
-          date: '2021',
-          icon: 'fa-certificate'
-        },
-        {
-          title: 'AWS Certified Developer',
-          issuer: 'Amazon Web Services',
-          date: '2022',
-          icon: 'fa-cloud'
-        },
-        {
-          title: 'Spring Professional Certification',
-          issuer: 'VMware',
-          date: '2023',
-          icon: 'fa-leaf'
-        },
-        {
-          title: 'Docker Certified Associate',
-          issuer: 'Docker Inc.',
-          date: '2023',
-          icon: 'fa-docker'
-        },
-        {
-          title: 'Kubernetes Administrator',
-          issuer: 'Cloud Native Computing Foundation',
-          date: '2024',
-          icon: 'fa-cube'
-        },
-        {
-          title: 'Agile Project Management',
-          issuer: 'Scrum Alliance',
-          date: '2024',
-          icon: 'fa-project-diagram'
-        }
-      ]
+      skills: skills,
+      selectedSkill: null,
+      circumference: 2 * Math.PI * 50
     }
   },
   computed: {
-    totalSkills() {
-      return Object.values(this.skills).reduce((total, category) => total + category.length, 0)
+    skillCategories() {
+      try {
+        const categories = {}
+        // Convert the skills object structure to categories
+        Object.keys(this.skills).forEach(categoryKey => {
+          const categoryName = this.formatCategoryName(categoryKey)
+          categories[categoryName] = {
+            name: categoryName,
+            skills: this.skills[categoryKey].map(skill => ({
+              ...skill,
+              category: categoryName,
+              experience: skill.years || '2+ years',
+              description: `Proficient in ${skill.name} with ${skill.years || '2+'} years of experience`
+            })),
+            icon: this.getCategoryIcon(categoryName)
+          }
+        })
+        
+        return Object.values(categories).map((category, index) => ({
+          ...category,
+          index
+        }))
+      } catch (error) {
+        console.error('Error in skillCategories computed property:', error)
+        return []
+      }
+    }
+  },
+  methods: {
+    formatCategoryName(categoryKey) {
+      const categoryMap = {
+        'backend': 'Backend',
+        'frontend': 'Frontend',
+        'database': 'Database',
+        'tools': 'Tools',
+        'cloud': 'Cloud',
+        'messaging': 'Messaging',
+        'testing': 'Testing',
+        'mobile': 'Mobile'
+      }
+      return categoryMap[categoryKey] || categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)
     },
-    expertSkills() {
-      return Object.values(this.skills)
-        .flat()
-        .filter(skill => skill.level >= 90).length
+    
+    getCategoryIcon(category) {
+      const icons = {
+        'Frontend': 'fas fa-paint-brush',
+        'Backend': 'fas fa-server',
+        'Database': 'fas fa-database',
+        'DevOps': 'fas fa-cogs',
+        'Mobile': 'fas fa-mobile-alt',
+        'Tools': 'fas fa-tools',
+        'Cloud': 'fas fa-cloud',
+        'Testing': 'fas fa-bug',
+        'Messaging': 'fas fa-comments'
+      }
+      return icons[category] || 'fas fa-code'
     },
-    advancedSkills() {
-      return Object.values(this.skills)
-        .flat()
-        .filter(skill => skill.level >= 80).length
+    getSkillIcon(skillName) {
+      const icons = {
+        'JavaScript': 'fab fa-js-square',
+        'Vue.js': 'fab fa-vuejs',
+        'React': 'fab fa-react',
+        'Node.js': 'fab fa-node-js',
+        'Java': 'fab fa-java',
+        'Python': 'fab fa-python',
+        'Docker': 'fab fa-docker',
+        'Git': 'fab fa-git-alt',
+        'AWS': 'fab fa-aws',
+        'MySQL': 'fas fa-database',
+        'MongoDB': 'fas fa-database'
+      }
+      return icons[skillName] || 'fas fa-code'
     },
-    averageExperience() {
-      const allSkills = Object.values(this.skills).flat()
-      const totalYears = allSkills.reduce((sum, skill) => {
-        const years = parseFloat(skill.years.replace('+', ''))
-        return sum + years
-      }, 0)
-      return (totalYears / allSkills.length).toFixed(1) + '+ years'
+    getSkillColor(level) {
+      if (level >= 80) return '#28a745'
+      if (level >= 60) return '#17a2b8'
+      if (level >= 40) return '#ffc107'
+      return '#dc3545'
+    },
+    getCircularOffset(level) {
+      return this.circumference - (level / 100) * this.circumference
+    },
+    showSkillDetails(skill) {
+      this.selectedSkill = skill
+      document.body.style.overflow = 'hidden'
+    },
+    hideSkillDetails() {
+      this.selectedSkill = null
+      document.body.style.overflow = 'auto'
+    },
+    getRelatedProjects(skillName) {
+      // Mock related projects - in real app, this would come from data
+      const projectMap = {
+        'JavaScript': ['E-commerce Platform', 'Task Management App'],
+        'Vue.js': ['Portfolio Website', 'Admin Dashboard'],
+        'Java': ['Microservices API', 'Banking System'],
+        'Spring Boot': ['REST API', 'Authentication Service'],
+        'Docker': ['Containerized Apps', 'CI/CD Pipeline'],
+        'MySQL': ['Database Design', 'Query Optimization']
+      }
+      return projectMap[skillName] || ['Various Projects']
     }
   }
 }
@@ -313,192 +266,304 @@ export default {
 .skills-page {
   padding-top: 100px;
   min-height: 100vh;
+  background: linear-gradient(135deg, var(--body-bg) 0%, var(--secondary-bg) 100%);
+  color: var(--text-color);
 }
 
-.page-header {
-  background: linear-gradient(135deg, var(--primary-color), var(--info-color));
-  color: white;
-  margin: -20px -15px 0;
-  border-radius: 0 0 20px 20px;
+.title-gradient {
+  background: linear-gradient(45deg, var(--primary-color), var(--accent-color), var(--primary-color));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 3s ease-in-out infinite;
 }
 
-.overview-card {
-  padding: 30px 20px;
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.skills-categories {
+  margin-top: 4rem;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 3rem;
+  color: var(--text-color);
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.category-card {
   background: var(--card-bg);
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  height: 100%;
 }
 
-.overview-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
 }
 
-.overview-skills {
+.category-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  justify-content: center;
-  margin-top: 15px;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.skill-tag {
-  background: var(--primary-color);
+.category-icon {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: white;
-  padding: 4px 8px;
+  font-size: 1.2rem;
+}
+
+.category-title {
+  flex: 1;
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.category-count {
+  background: rgba(0, 123, 255, 0.1);
+  color: var(--primary-color);
+  padding: 4px 12px;
   border-radius: 15px;
   font-size: 0.8rem;
   font-weight: 500;
 }
 
-.summary-item {
-  padding: 20px;
-  background: rgba(0, 123, 255, 0.05);
-  border-radius: 15px;
+.category-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skill-item {
+  cursor: pointer;
   transition: all 0.3s ease;
+  padding: 0.5rem;
+  border-radius: 10px;
 }
 
-.summary-item:hover {
-  background: rgba(0, 123, 255, 0.1);
-  transform: translateY(-5px);
+.skill-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(5px);
 }
 
-.summary-icon {
-  margin-bottom: 15px;
+.skill-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
 
-.learning-timeline {
-  position: relative;
-  padding: 20px 0;
+.skill-name {
+  font-weight: 500;
+  color: var(--text-color);
 }
 
-.learning-timeline::before {
-  content: '';
-  position: absolute;
-  left: 50%;
+.skill-level {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.skill-bar {
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.skill-progress {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease;
+}
+
+.skill-experience {
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+}
+
+/* Skill Modal */
+.skill-modal {
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   bottom: 0;
-  width: 2px;
-  background: var(--primary-color);
-  transform: translateX(-50%);
-}
-
-.learning-phase {
-  position: relative;
-  margin: 40px 0;
-  width: 50%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 2rem;
 }
 
-.learning-phase:nth-child(odd) {
-  left: 0;
-  padding-right: 40px;
-  flex-direction: row;
-}
-
-.learning-phase:nth-child(even) {
-  left: 50%;
-  padding-left: 40px;
-  flex-direction: row-reverse;
-}
-
-.learning-phase::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 15px;
-  height: 15px;
-  background: var(--primary-color);
-  border-radius: 50%;
-  border: 3px solid var(--body-bg);
-  transform: translateY(-50%);
-}
-
-.learning-phase:nth-child(odd)::before {
-  right: -7px;
-}
-
-.learning-phase:nth-child(even)::before {
-  left: -7px;
-}
-
-.phase-year {
-  background: var(--primary-color);
-  color: white;
-  padding: 10px 15px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin: 0 20px;
-  flex-shrink: 0;
-}
-
-.phase-content {
+.modal-content {
   background: var(--card-bg);
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
-  flex: 1;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.phase-skills {
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 10px;
-}
-
-.certification-card {
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
   transition: all 0.3s ease;
 }
 
-.certification-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.8);
 }
 
-.cert-icon {
-  margin-bottom: 15px;
+.modal-header {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.cta-section {
-  background: var(--light-color);
-  padding: 40px;
+.skill-icon-large {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+}
+
+.skill-info-large h2 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+}
+
+.skill-category {
+  color: var(--primary-color);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.skill-level-large {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.level-circle {
+  position: relative;
+}
+
+.level-svg {
+  transform: rotate(-90deg);
+}
+
+.level-progress {
+  transition: stroke-dashoffset 1s ease;
+}
+
+.level-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.modal-body h3 {
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.modal-body p {
+  color: var(--secondary-color);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.project-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.project-tag {
+  background: rgba(0, 123, 255, 0.1);
+  color: var(--primary-color);
+  padding: 4px 12px;
   border-radius: 15px;
-  margin-top: 40px;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
-  .page-header {
-    margin: -20px -15px 0;
+  .categories-grid {
+    grid-template-columns: 1fr;
   }
   
-  .learning-timeline::before {
-    left: 20px;
+  .modal-header {
+    flex-direction: column;
+    text-align: center;
   }
   
-  .learning-phase {
-    width: 100%;
-    left: 0 !important;
-    padding-left: 60px !important;
-    padding-right: 0 !important;
-    flex-direction: row !important;
+  .skill-icon-large {
+    margin: 0 auto;
   }
   
-  .learning-phase::before {
-    left: 10px !important;
-    right: auto !important;
-  }
-  
-  .phase-year {
-    margin: 0 10px 0 0;
-  }
-  
-  .cta-section {
-    padding: 30px 20px;
+  .skill-level-large {
+    justify-content: center;
   }
 }
 </style>

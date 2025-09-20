@@ -215,6 +215,9 @@ export default {
 <style scoped>
 .home-page {
   padding-top: 100px;
+  background: var(--body-bg);
+  color: var(--text-color);
+  min-height: 100vh;
 }
 
 .section {

@@ -16,19 +16,28 @@ export default {
     let scrollTargetZ = 5
 
     const init = () => {
-      scene = new THREE.Scene()
-      scene.background = new THREE.Color(0x0e1726)
+      try {
+        scene = new THREE.Scene()
+        scene.background = new THREE.Color(0x0e1726)
 
-      const width = container.value.clientWidth
-      const height = container.value.clientHeight
+        const width = container.value.clientWidth
+        const height = container.value.clientHeight
 
-      camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100)
-      camera.position.set(0, 1, 8)
+        camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100)
+        camera.position.set(0, 1, 8)
 
-      renderer = new THREE.WebGLRenderer({ antialias: true })
-      renderer.setSize(width, height)
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-      container.value.appendChild(renderer.domElement)
+        renderer = new THREE.WebGLRenderer({ antialias: true })
+        renderer.setSize(width, height)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        container.value.appendChild(renderer.domElement)
+      } catch (error) {
+        console.warn('WebGL not supported or Three.js initialization failed:', error)
+        // Hide the container if WebGL fails
+        if (container.value) {
+          container.value.style.display = 'none'
+        }
+        return
+      }
 
       const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0)
       hemiLight.position.set(0, 20, 0)
@@ -111,13 +120,22 @@ export default {
     }
 
     const animate = () => {
-      animationId = requestAnimationFrame(animate)
-      // Idle rotation
-      cube.rotation.x += 0.005
-      sphere.rotation.y += 0.006
-      // Smooth camera z towards scroll target
-      camera.position.z += (scrollTargetZ - camera.position.z) * 0.08
-      renderer.render(scene, camera)
+      if (!renderer || !scene || !camera) return
+      
+      try {
+        animationId = requestAnimationFrame(animate)
+        // Idle rotation
+        if (cube) cube.rotation.x += 0.005
+        if (sphere) sphere.rotation.y += 0.006
+        // Smooth camera z towards scroll target
+        camera.position.z += (scrollTargetZ - camera.position.z) * 0.08
+        renderer.render(scene, camera)
+      } catch (error) {
+        console.warn('Animation loop error:', error)
+        if (animationId) {
+          cancelAnimationFrame(animationId)
+        }
+      }
     }
 
     onMounted(() => init())

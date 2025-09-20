@@ -15,7 +15,7 @@
             <li><router-link to="/experience" class="text-decoration-none">Experience</router-link></li>
             <li><router-link to="/projects" class="text-decoration-none">Projects</router-link></li>
             <li><router-link to="/skills" class="text-decoration-none">Skills</router-link></li>
-            <li><router-link to="/blog" class="text-decoration-none">Blog</router-link></li>
+            <!-- <li><router-link to="/blog" class="text-decoration-none">Blog</router-link></li> -->
             <li><router-link to="/contact" class="text-decoration-none">Contact</router-link></li>
           </ul>
         </div>

@@ -1,230 +1,250 @@
 <template>
   <div class="skill-visualization">
-    <!-- Skill Controls -->
-    <div class="skill-controls">
-      <div class="view-toggle">
+    <div class="viz-header">
+      <h2 class="viz-title">
+        <i class="fas fa-chart-pie me-2"></i>
+        Skills Visualization
+      </h2>
+      <div class="viz-controls">
         <button 
-          v-for="view in viewModes" 
-          :key="view.id"
-          @click="currentView = view.id"
+          @click="viewMode = 'radar'" 
+          :class="{ active: viewMode === 'radar' }"
           class="view-btn"
-          :class="{ active: currentView === view.id }"
+          title="Radar Chart"
         >
-          <i :class="view.icon"></i>
-          {{ view.label }}
+          <i class="fas fa-chart-radar"></i>
+        </button>
+        <button 
+          @click="viewMode = 'bars'" 
+          :class="{ active: viewMode === 'bars' }"
+          class="view-btn"
+          title="Bar Chart"
+        >
+          <i class="fas fa-chart-bar"></i>
+        </button>
+        <button 
+          @click="viewMode = 'circular'" 
+          :class="{ active: viewMode === 'circular' }"
+          class="view-btn"
+          title="Circular Progress"
+        >
+          <i class="fas fa-circle-notch"></i>
+        </button>
+        <button 
+          @click="viewMode = 'network'" 
+          :class="{ active: viewMode === 'network' }"
+          class="view-btn"
+          title="Skill Network"
+        >
+          <i class="fas fa-project-diagram"></i>
         </button>
       </div>
+    </div>
+
+    <!-- Radar Chart View -->
+    <div v-if="viewMode === 'radar'" class="radar-container">
+      <div class="radar-chart">
+        <svg :width="chartSize" :height="chartSize" class="radar-svg">
+          <!-- Background circles -->
+          <g v-for="level in 5" :key="level" class="radar-level">
+            <circle 
+              :cx="chartSize/2" 
+              :cy="chartSize/2" 
+              :r="(chartSize/2 - 50) * (level / 5)"
+              fill="none"
+              :stroke="getLevelColor(level)"
+              :stroke-width="level === 5 ? 2 : 1"
+              :opacity="level === 5 ? 1 : 0.3"
+            />
+          </g>
+          
+          <!-- Skill axes -->
+          <g v-for="(skill, index) in skills" :key="skill.name" class="skill-axis">
+            <line
+              :x1="chartSize/2"
+              :y1="chartSize/2"
+              :x2="getAxisX(index)"
+              :y2="getAxisY(index)"
+              stroke="var(--border-color)"
+              stroke-width="1"
+              opacity="0.5"
+            />
+            <text
+              :x="getAxisX(index)"
+              :y="getAxisY(index)"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              class="axis-label"
+            >
+              {{ skill.name }}
+            </text>
+          </g>
+          
+          <!-- Skill data polygon -->
+          <polygon
+            :points="skillPolygonPoints"
+            fill="var(--primary-color)"
+            fill-opacity="0.2"
+            stroke="var(--primary-color)"
+            stroke-width="2"
+          />
+          
+          <!-- Skill data points -->
+          <circle
+            v-for="(skill, index) in skills"
+            :key="`point-${skill.name}`"
+            :cx="getSkillX(index)"
+            :cy="getSkillY(index)"
+            :r="6"
+            :fill="getSkillColor(skill.level)"
+            stroke="white"
+            stroke-width="2"
+            class="skill-point"
+            @mouseenter="showTooltip(skill, $event)"
+            @mouseleave="hideTooltip"
+          />
+        </svg>
+      </div>
       
-      <div class="filter-controls">
-        <div class="category-filter">
-          <select v-model="selectedCategory" class="category-select">
-            <option value="">All Categories</option>
-            <option v-for="category in categories" :key="category" :value="category">
-              {{ category }}
-            </option>
-          </select>
-        </div>
-        
-        <div class="level-filter">
-          <label>Min Level:</label>
-          <input 
-            v-model="minLevel" 
-            type="range" 
-            min="0" 
-            max="100" 
-            step="10"
-            class="level-slider"
-          >
-          <span class="level-value">{{ minLevel }}%</span>
+      <div class="radar-legend">
+        <div class="legend-item" v-for="skill in skills" :key="skill.name">
+          <div class="legend-color" :style="{ backgroundColor: getSkillColor(skill.level) }"></div>
+          <span class="legend-text">{{ skill.name }} ({{ skill.level }}%)</span>
         </div>
       </div>
     </div>
 
-    <!-- Skill Content -->
-    <div class="skill-content">
-      <!-- Radar Chart View -->
-      <div v-if="currentView === 'radar'" class="radar-view">
-        <div class="chart-container">
-          <canvas ref="radarChart" width="400" height="400"></canvas>
-        </div>
-        <div class="radar-legend">
-          <div v-for="skill in radarSkills" :key="skill.name" class="legend-item">
-            <div class="legend-color" :style="{ backgroundColor: skill.color }"></div>
-            <span>{{ skill.name }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Progress Bars View -->
-      <div v-else-if="currentView === 'progress'" class="progress-view">
-        <div class="progress-container">
-          <div 
-            v-for="skill in filteredSkills" 
-            :key="skill.name"
-            class="progress-item"
-            :style="{ animationDelay: (filteredSkills.indexOf(skill) * 0.1) + 's' }"
-          >
-            <div class="skill-header">
-              <div class="skill-info">
-                <h5>{{ skill.name }}</h5>
-                <span class="skill-category">{{ skill.category }}</span>
-              </div>
-              <div class="skill-level">{{ skill.level }}%</div>
-            </div>
-            
-            <div class="progress-bar-container">
-              <div class="progress-bar">
-                <div 
-                  class="progress-fill"
-                  :style="{ 
-                    width: skill.level + '%',
-                    backgroundColor: getSkillColor(skill.level)
-                  }"
-                ></div>
-              </div>
-            </div>
-            
-            <div class="skill-details">
-              <p>{{ skill.description }}</p>
-              <div class="skill-experience">
-                <i class="fas fa-clock"></i>
-                <span>{{ skill.experience }} years experience</span>
-              </div>
+    <!-- Bar Chart View -->
+    <div v-if="viewMode === 'bars'" class="bars-container">
+      <div class="bars-chart">
+        <div 
+          v-for="skill in sortedSkills" 
+          :key="skill.name"
+          class="bar-item"
+          @mouseenter="showTooltip(skill, $event)"
+          @mouseleave="hideTooltip"
+        >
+          <div class="bar-label">{{ skill.name }}</div>
+          <div class="bar-track">
+            <div 
+              class="bar-fill"
+              :style="{ 
+                width: `${skill.level}%`,
+                backgroundColor: getSkillColor(skill.level)
+              }"
+            >
+              <span class="bar-value">{{ skill.level }}%</span>
             </div>
           </div>
+          <div class="bar-category">{{ skill.category }}</div>
         </div>
       </div>
+    </div>
 
-      <!-- Grid View -->
-      <div v-else-if="currentView === 'grid'" class="grid-view">
-        <div class="skill-grid">
-          <div 
-            v-for="skill in filteredSkills" 
-            :key="skill.name"
-            class="skill-card"
-            :style="{ animationDelay: (filteredSkills.indexOf(skill) * 0.1) + 's' }"
-            @click="openSkillModal(skill)"
-          >
-            <div class="card-header">
-              <div class="skill-icon">
-                <i :class="skill.icon"></i>
-              </div>
-              <div class="skill-level-circle">
-                <div class="level-text">{{ skill.level }}%</div>
-              </div>
-            </div>
-            
-            <div class="card-body">
-              <h5>{{ skill.name }}</h5>
-              <p>{{ skill.description }}</p>
-              
-              <div class="skill-meta">
-                <div class="meta-item">
-                  <i class="fas fa-tag"></i>
-                  <span>{{ skill.category }}</span>
-                </div>
-                <div class="meta-item">
-                  <i class="fas fa-clock"></i>
-                  <span>{{ skill.experience }}y</span>
-                </div>
-              </div>
-            </div>
-            
-            <div class="card-footer">
-              <div class="skill-progress">
-                <div 
-                  class="progress-line"
-                  :style="{ 
-                    width: skill.level + '%',
-                    backgroundColor: getSkillColor(skill.level)
-                  }"
-                ></div>
-              </div>
+    <!-- Circular Progress View -->
+    <div v-if="viewMode === 'circular'" class="circular-container">
+      <div class="circular-grid">
+        <div 
+          v-for="skill in skills" 
+          :key="skill.name"
+          class="circular-item"
+          @mouseenter="showTooltip(skill, $event)"
+          @mouseleave="hideTooltip"
+        >
+          <div class="circular-chart">
+            <svg :width="circularSize" :height="circularSize" class="circular-svg">
+              <circle
+                :cx="circularSize/2"
+                :cy="circularSize/2"
+                :r="(circularSize - 20)/2"
+                fill="none"
+                stroke="var(--border-color)"
+                stroke-width="8"
+                opacity="0.3"
+              />
+              <circle
+                :cx="circularSize/2"
+                :cy="circularSize/2"
+                :r="(circularSize - 20)/2"
+                fill="none"
+                :stroke="getSkillColor(skill.level)"
+                stroke-width="8"
+                stroke-linecap="round"
+                :stroke-dasharray="circumference"
+                :stroke-dashoffset="getCircularOffset(skill.level)"
+                class="circular-progress"
+              />
+            </svg>
+            <div class="circular-text">
+              <div class="circular-percentage">{{ skill.level }}%</div>
+              <div class="circular-skill">{{ skill.name }}</div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Comparison View -->
-      <div v-else-if="currentView === 'comparison'" class="comparison-view">
-        <div class="comparison-controls">
-          <h4>Compare Skills</h4>
-          <div class="skill-selectors">
-            <select v-model="compareSkill1" class="skill-select">
-              <option value="">Select first skill</option>
-              <option v-for="skill in filteredSkills" :key="skill.name" :value="skill.name">
-                {{ skill.name }}
-              </option>
-            </select>
-            <select v-model="compareSkill2" class="skill-select">
-              <option value="">Select second skill</option>
-              <option v-for="skill in filteredSkills" :key="skill.name" :value="skill.name">
-                {{ skill.name }}
-              </option>
-            </select>
-          </div>
-        </div>
-        
-        <div v-if="compareSkill1 && compareSkill2" class="comparison-chart">
-          <div class="comparison-item">
-            <h5>{{ compareSkill1 }}</h5>
-            <div class="comparison-bar">
-              <div 
-                class="bar-fill"
-                :style="{ 
-                  width: getSkillLevel(compareSkill1) + '%',
-                  backgroundColor: '#007bff'
-                }"
-              ></div>
-            </div>
-            <span class="comparison-level">{{ getSkillLevel(compareSkill1) }}%</span>
-          </div>
+    <!-- Network View -->
+    <div v-if="viewMode === 'network'" class="network-container">
+      <div class="network-chart">
+        <svg :width="networkSize" :height="networkSize" class="network-svg">
+          <!-- Skill nodes -->
+          <g v-for="skill in skills" :key="skill.name" class="skill-node">
+            <circle
+              :cx="getNetworkX(skill)"
+              :cy="getNetworkY(skill)"
+              :r="getNodeSize(skill.level)"
+              :fill="getSkillColor(skill.level)"
+              stroke="white"
+              stroke-width="2"
+              class="node-circle"
+              @mouseenter="showTooltip(skill, $event)"
+              @mouseleave="hideTooltip"
+            />
+            <text
+              :x="getNetworkX(skill)"
+              :y="getNetworkY(skill) + 5"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              class="node-label"
+            >
+              {{ skill.name }}
+            </text>
+          </g>
           
-          <div class="comparison-item">
-            <h5>{{ compareSkill2 }}</h5>
-            <div class="comparison-bar">
-              <div 
-                class="bar-fill"
-                :style="{ 
-                  width: getSkillLevel(compareSkill2) + '%',
-                  backgroundColor: '#28a745'
-                }"
-              ></div>
-            </div>
-            <span class="comparison-level">{{ getSkillLevel(compareSkill2) }}%</span>
-          </div>
-        </div>
+          <!-- Connections between related skills -->
+          <g v-for="connection in skillConnections" :key="`${connection.from}-${connection.to}`" class="connection">
+            <line
+              :x1="getNetworkX(getSkillByName(connection.from))"
+              :y1="getNetworkY(getSkillByName(connection.from))"
+              :x2="getNetworkX(getSkillByName(connection.to))"
+              :y2="getNetworkY(getSkillByName(connection.to))"
+              stroke="var(--primary-color)"
+              stroke-width="2"
+              opacity="0.3"
+            />
+          </g>
+        </svg>
       </div>
+    </div>
 
-      <!-- Timeline View -->
-      <div v-else-if="currentView === 'timeline'" class="timeline-view">
-        <div class="skill-timeline">
-          <div 
-            v-for="(skill, index) in filteredSkills" 
-            :key="skill.name"
-            class="timeline-item"
-            :style="{ animationDelay: (index * 0.1) + 's' }"
-          >
-            <div class="timeline-marker">
-              <div class="marker-icon">
-                <i :class="skill.icon"></i>
-              </div>
-              <div class="marker-level">{{ skill.level }}%</div>
-            </div>
-            
-            <div class="timeline-content">
-              <h5>{{ skill.name }}</h5>
-              <p>{{ skill.description }}</p>
-              <div class="timeline-progress">
-                <div 
-                  class="progress-fill"
-                  :style="{ 
-                    width: skill.level + '%',
-                    backgroundColor: getSkillColor(skill.level)
-                  }"
-                ></div>
-              </div>
-            </div>
+    <!-- Tooltip -->
+    <div v-if="tooltip.visible" class="skill-tooltip" :style="tooltipStyle">
+      <div class="tooltip-content">
+        <h4>{{ tooltip.skill?.name }}</h4>
+        <p>{{ tooltip.skill?.description }}</p>
+        <div class="tooltip-details">
+          <div class="tooltip-level">
+            <span>Level:</span>
+            <span class="level-value">{{ tooltip.skill?.level }}%</span>
+          </div>
+          <div class="tooltip-category">
+            <span>Category:</span>
+            <span class="category-value">{{ tooltip.skill?.category }}</span>
+          </div>
+          <div class="tooltip-experience">
+            <span>Experience:</span>
+            <span class="experience-value">{{ tooltip.skill?.experience }}</span>
           </div>
         </div>
       </div>
@@ -237,8 +257,8 @@
           <i class="fas fa-code"></i>
         </div>
         <div class="stat-content">
-          <h4>{{ filteredSkills.length }}</h4>
-          <p>Total Skills</p>
+          <div class="stat-number">{{ skills.length }}</div>
+          <div class="stat-label">Total Skills</div>
         </div>
       </div>
       
@@ -247,8 +267,8 @@
           <i class="fas fa-star"></i>
         </div>
         <div class="stat-content">
-          <h4>{{ averageLevel }}%</h4>
-          <p>Average Level</p>
+          <div class="stat-number">{{ averageLevel }}%</div>
+          <div class="stat-label">Average Level</div>
         </div>
       </div>
       
@@ -257,86 +277,18 @@
           <i class="fas fa-trophy"></i>
         </div>
         <div class="stat-content">
-          <h4>{{ expertSkills }}</h4>
-          <p>Expert Level</p>
+          <div class="stat-number">{{ expertSkills.length }}</div>
+          <div class="stat-label">Expert Level</div>
         </div>
       </div>
       
       <div class="stat-card">
         <div class="stat-icon">
-          <i class="fas fa-clock"></i>
+          <i class="fas fa-layer-group"></i>
         </div>
         <div class="stat-content">
-          <h4>{{ totalExperience }}</h4>
-          <p>Years Experience</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Skill Detail Modal -->
-    <div v-if="selectedSkill" class="modal-overlay" @click="closeSkillModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <div class="skill-header">
-            <div class="skill-icon-large">
-              <i :class="selectedSkill.icon"></i>
-            </div>
-            <div class="skill-info">
-              <h3>{{ selectedSkill.name }}</h3>
-              <span class="skill-category">{{ selectedSkill.category }}</span>
-            </div>
-          </div>
-          <button @click="closeSkillModal" class="modal-close">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        
-        <div class="modal-body">
-          <div class="skill-level-display">
-            <div class="level-circle">
-              <div class="level-text">{{ selectedSkill.level }}%</div>
-            </div>
-            <div class="level-description">
-              <h4>{{ getLevelDescription(selectedSkill.level) }}</h4>
-              <p>{{ selectedSkill.description }}</p>
-            </div>
-          </div>
-          
-          <div class="skill-details">
-            <div class="detail-item">
-              <i class="fas fa-clock"></i>
-              <div>
-                <h5>Experience</h5>
-                <p>{{ selectedSkill.experience }} years</p>
-              </div>
-            </div>
-            
-            <div class="detail-item">
-              <i class="fas fa-calendar"></i>
-              <div>
-                <h5>Last Used</h5>
-                <p>{{ selectedSkill.lastUsed }}</p>
-              </div>
-            </div>
-            
-            <div class="detail-item">
-              <i class="fas fa-project-diagram"></i>
-              <div>
-                <h5>Projects</h5>
-                <p>{{ selectedSkill.projects }} projects</p>
-              </div>
-            </div>
-          </div>
-          
-          <div class="skill-projects">
-            <h5>Recent Projects</h5>
-            <div class="project-list">
-              <div v-for="project in selectedSkill.recentProjects" :key="project" class="project-item">
-                <i class="fas fa-folder"></i>
-                <span>{{ project }}</span>
-              </div>
-            </div>
-          </div>
+          <div class="stat-number">{{ categories.length }}</div>
+          <div class="stat-label">Categories</div>
         </div>
       </div>
     </div>
@@ -350,123 +302,230 @@ export default {
   name: 'SkillVisualization',
   data() {
     return {
-      skills,
-      currentView: 'progress',
-      selectedCategory: '',
-      minLevel: 0,
-      selectedSkill: null,
-      compareSkill1: '',
-      compareSkill2: '',
-      viewModes: [
-        { id: 'progress', label: 'Progress', icon: 'fas fa-chart-bar' },
-        { id: 'grid', label: 'Grid', icon: 'fas fa-th' },
-        { id: 'radar', label: 'Radar', icon: 'fas fa-chart-pie' },
-        { id: 'comparison', label: 'Compare', icon: 'fas fa-balance-scale' },
-        { id: 'timeline', label: 'Timeline', icon: 'fas fa-stream' }
-      ]
+      skills: skills,
+      viewMode: 'radar',
+      chartSize: 400,
+      circularSize: 120,
+      networkSize: 500,
+      tooltip: {
+        visible: false,
+        skill: null,
+        x: 0,
+        y: 0
+      }
     }
   },
   computed: {
+    sortedSkills() {
+      const flatSkills = this.flattenSkills()
+      return [...flatSkills].sort((a, b) => b.level - a.level)
+    },
     categories() {
-      return [...new Set(this.skills.map(skill => skill.category))]
+      return [...new Set(this.flattenSkills().map(skill => skill.category))].sort()
     },
-    filteredSkills() {
-      return this.skills.filter(skill => {
-        const categoryMatch = !this.selectedCategory || skill.category === this.selectedCategory
-        const levelMatch = skill.level >= this.minLevel
-        return categoryMatch && levelMatch
-      })
-    },
-    radarSkills() {
-      // Select top skills for radar chart
-      return this.filteredSkills
-        .sort((a, b) => b.level - a.level)
-        .slice(0, 6)
-        .map((skill, index) => ({
-          ...skill,
-          color: this.getSkillColor(skill.level)
-        }))
+    uniqueTechnologies() {
+      return this.flattenSkills().map(skill => skill.name).sort()
     },
     averageLevel() {
-      if (this.filteredSkills.length === 0) return 0
-      const total = this.filteredSkills.reduce((sum, skill) => sum + skill.level, 0)
-      return Math.round(total / this.filteredSkills.length)
+      const flatSkills = this.flattenSkills()
+      const total = flatSkills.reduce((sum, skill) => sum + skill.level, 0)
+      return Math.round(total / flatSkills.length)
     },
     expertSkills() {
-      return this.filteredSkills.filter(skill => skill.level >= 80).length
+      return this.flattenSkills().filter(skill => skill.level >= 80)
     },
-    totalExperience() {
-      return this.filteredSkills.reduce((sum, skill) => sum + skill.experience, 0)
+    skillPolygonPoints() {
+      const flatSkills = this.flattenSkills()
+      return flatSkills.map((skill, index) => {
+        const x = this.getSkillX(index)
+        const y = this.getSkillY(index)
+        return `${x},${y}`
+      }).join(' ')
+    },
+    circumference() {
+      return 2 * Math.PI * ((this.circularSize - 20) / 2)
+    },
+    skillConnections() {
+      // Define connections between related skills
+      return [
+        { from: 'JavaScript', to: 'React' },
+        { from: 'JavaScript', to: 'Node.js' },
+        { from: 'Java', to: 'Spring Boot' },
+        { from: 'Spring Boot', to: 'Microservices' },
+        { from: 'Docker', to: 'Kubernetes' },
+        { from: 'MySQL', to: 'PostgreSQL' },
+        { from: 'React', to: 'Redux' },
+        { from: 'Python', to: 'Django' }
+      ]
+    },
+    tooltipStyle() {
+      return {
+        left: `${this.tooltip.x}px`,
+        top: `${this.tooltip.y}px`,
+        transform: 'translate(-50%, -100%)'
+      }
     }
   },
   methods: {
+    flattenSkills() {
+      try {
+        const flatSkills = []
+        Object.keys(this.skills).forEach(categoryKey => {
+          const categoryName = this.formatCategoryName(categoryKey)
+          this.skills[categoryKey].forEach(skill => {
+            flatSkills.push({
+              ...skill,
+              category: categoryName,
+              experience: skill.years || '2+ years',
+              description: `Proficient in ${skill.name} with ${skill.years || '2+'} years of experience`
+            })
+          })
+        })
+        return flatSkills
+      } catch (error) {
+        console.error('Error in flattenSkills method:', error)
+        return []
+      }
+    },
+    
+    formatCategoryName(categoryKey) {
+      const categoryMap = {
+        'backend': 'Backend',
+        'frontend': 'Frontend',
+        'database': 'Database',
+        'tools': 'Tools',
+        'cloud': 'Cloud',
+        'messaging': 'Messaging',
+        'testing': 'Testing',
+        'mobile': 'Mobile'
+      }
+      return categoryMap[categoryKey] || categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)
+    },
+    
+    getAxisX(index) {
+      const flatSkills = this.flattenSkills()
+      const angle = (index * 2 * Math.PI) / flatSkills.length
+      return this.chartSize/2 + Math.cos(angle) * (this.chartSize/2 - 50)
+    },
+    getAxisY(index) {
+      const flatSkills = this.flattenSkills()
+      const angle = (index * 2 * Math.PI) / flatSkills.length
+      return this.chartSize/2 + Math.sin(angle) * (this.chartSize/2 - 50)
+    },
+    getSkillX(index) {
+      const flatSkills = this.flattenSkills()
+      const skill = flatSkills[index]
+      if (!skill) return 0
+      const angle = (index * 2 * Math.PI) / flatSkills.length
+      const radius = (this.chartSize/2 - 50) * (skill.level / 100)
+      return this.chartSize/2 + Math.cos(angle) * radius
+    },
+    getSkillY(index) {
+      const flatSkills = this.flattenSkills()
+      const skill = flatSkills[index]
+      if (!skill) return 0
+      const angle = (index * 2 * Math.PI) / flatSkills.length
+      const radius = (this.chartSize/2 - 50) * (skill.level / 100)
+      return this.chartSize/2 + Math.sin(angle) * radius
+    },
+    getNetworkX(skill) {
+      const flatSkills = this.flattenSkills()
+      const index = flatSkills.indexOf(skill)
+      const angle = (index * 2 * Math.PI) / flatSkills.length
+      return this.networkSize/2 + Math.cos(angle) * (this.networkSize/2 - 80)
+    },
+    getNetworkY(skill) {
+      const flatSkills = this.flattenSkills()
+      const index = flatSkills.indexOf(skill)
+      const angle = (index * 2 * Math.PI) / flatSkills.length
+      return this.networkSize/2 + Math.sin(angle) * (this.networkSize/2 - 80)
+    },
+    getNodeSize(level) {
+      return Math.max(15, Math.min(30, 15 + (level / 100) * 15))
+    },
     getSkillColor(level) {
-      if (level >= 80) return '#28a745' // Green
-      if (level >= 60) return '#007bff' // Blue
-      if (level >= 40) return '#ffc107' // Yellow
-      return '#dc3545' // Red
+      if (level >= 80) return '#28a745'
+      if (level >= 60) return '#17a2b8'
+      if (level >= 40) return '#ffc107'
+      return '#dc3545'
     },
-    
-    getLevelDescription(level) {
-      if (level >= 90) return 'Expert'
-      if (level >= 80) return 'Advanced'
-      if (level >= 60) return 'Intermediate'
-      if (level >= 40) return 'Beginner'
-      return 'Novice'
+    getLevelColor(level) {
+      const colors = ['#e9ecef', '#dee2e6', '#ced4da', '#adb5bd', '#6c757d']
+      return colors[level - 1] || colors[0]
     },
-    
-    getSkillLevel(skillName) {
-      const skill = this.skills.find(s => s.name === skillName)
-      return skill ? skill.level : 0
+    getCircularOffset(level) {
+      return this.circumference - (level / 100) * this.circumference
     },
-    
-    openSkillModal(skill) {
-      this.selectedSkill = skill
+    getSkillByName(name) {
+      return this.flattenSkills().find(skill => skill.name === name)
     },
-    
-    closeSkillModal() {
-      this.selectedSkill = null
+    showTooltip(skill, event) {
+      this.tooltip = {
+        visible: true,
+        skill: skill,
+        x: event.clientX,
+        y: event.clientY
+      }
+    },
+    hideTooltip() {
+      this.tooltip.visible = false
     }
+  },
+  mounted() {
+    // Add responsive handling
+    const handleResize = () => {
+      const container = this.$el.querySelector('.skill-visualization')
+      if (container) {
+        const width = container.offsetWidth
+        this.chartSize = Math.min(400, width - 40)
+        this.networkSize = Math.min(500, width - 40)
+      }
+    }
+    
+    window.addEventListener('resize', handleResize)
+    handleResize()
+    
+    this.$on('hook:beforeDestroy', () => {
+      window.removeEventListener('resize', handleResize)
+    })
   }
 }
 </script>
 
 <style scoped>
 .skill-visualization {
-  padding: 40px 0;
+  padding: 2rem 0;
 }
 
-.skill-controls {
-  background: var(--card-bg);
-  border-radius: 15px;
-  padding: 30px;
-  margin-bottom: 40px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-}
-
-.view-toggle {
+.viz-header {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.viz-title {
+  color: var(--text-color);
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.viz-controls {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .view-btn {
-  padding: 10px 20px;
+  padding: 8px 12px;
   border: 2px solid var(--border-color);
-  background: var(--body-bg);
+  background: var(--bg-color);
   color: var(--text-color);
-  border-radius: 25px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.view-btn:hover {
-  border-color: var(--primary-color);
-  background: rgba(0, 123, 255, 0.1);
 }
 
 .view-btn.active {
@@ -475,619 +534,319 @@ export default {
   border-color: var(--primary-color);
 }
 
-.filter-controls {
+.view-btn:hover:not(.active) {
+  background: var(--secondary-bg);
+  border-color: var(--secondary-color);
+}
+
+/* Radar Chart */
+.radar-container {
   display: flex;
-  gap: 30px;
+  gap: 2rem;
   align-items: center;
   flex-wrap: wrap;
 }
 
-.category-select {
-  padding: 8px 12px;
-  border: 2px solid var(--border-color);
-  background: var(--body-bg);
-  color: var(--text-color);
-  border-radius: 8px;
-  cursor: pointer;
+.radar-chart {
+  flex: 1;
+  min-width: 300px;
 }
 
-.level-filter {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.radar-svg {
+  width: 100%;
+  height: auto;
 }
 
-.level-slider {
-  width: 150px;
-}
-
-.level-value {
+.axis-label {
+  font-size: 0.8rem;
   font-weight: 500;
-  color: var(--primary-color);
-}
-
-/* Progress View */
-.progress-view {
-  padding: 20px 0;
-}
-
-.progress-container {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-.progress-item {
-  background: var(--card-bg);
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  animation: fadeInUp 0.6s ease forwards;
-  opacity: 0;
-}
-
-.skill-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.skill-info h5 {
-  margin-bottom: 5px;
   color: var(--text-color);
 }
 
-.skill-category {
-  color: var(--primary-color);
-  font-size: 0.9rem;
-}
-
-.skill-level {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--primary-color);
-}
-
-.progress-bar-container {
-  margin-bottom: 20px;
-}
-
-.progress-bar {
-  height: 12px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  border-radius: 6px;
-  transition: width 1s ease;
-}
-
-.skill-details p {
-  margin-bottom: 10px;
-  color: var(--text-color);
-}
-
-.skill-experience {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--secondary-color);
-}
-
-/* Grid View */
-.grid-view {
-  padding: 20px 0;
-}
-
-.skill-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 25px;
-}
-
-.skill-card {
-  background: var(--card-bg);
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+.skill-point {
   cursor: pointer;
   transition: all 0.3s ease;
-  animation: fadeInUp 0.6s ease forwards;
-  opacity: 0;
 }
 
-.skill-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+.skill-point:hover {
+  r: 8;
+  filter: drop-shadow(0 0 8px currentColor);
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.skill-icon {
-  width: 50px;
-  height: 50px;
-  background: var(--primary-color);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-}
-
-.skill-level-circle {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--primary-color);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.level-text {
-  font-weight: bold;
-  color: var(--primary-color);
-  font-size: 0.9rem;
-}
-
-.card-body h5 {
-  margin-bottom: 10px;
-  color: var(--text-color);
-}
-
-.card-body p {
-  margin-bottom: 15px;
-  color: var(--text-color);
-  font-size: 0.9rem;
-}
-
-.skill-meta {
-  display: flex;
-  gap: 15px;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--secondary-color);
-  font-size: 0.8rem;
-}
-
-.card-footer {
-  margin-top: 15px;
-}
-
-.skill-progress {
-  height: 6px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.progress-line {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 1s ease;
-}
-
-/* Comparison View */
-.comparison-view {
-  padding: 20px 0;
-}
-
-.comparison-controls {
-  background: var(--card-bg);
-  border-radius: 15px;
-  padding: 25px;
-  margin-bottom: 30px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-}
-
-.comparison-controls h4 {
-  margin-bottom: 20px;
-  color: var(--text-color);
-}
-
-.skill-selectors {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.skill-select {
-  padding: 8px 12px;
-  border: 2px solid var(--border-color);
-  background: var(--body-bg);
-  color: var(--text-color);
-  border-radius: 8px;
-  cursor: pointer;
+.radar-legend {
   min-width: 200px;
 }
 
-.comparison-chart {
-  background: var(--card-bg);
-  border-radius: 15px;
-  padding: 30px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.comparison-item {
-  margin-bottom: 30px;
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
 }
 
-.comparison-item h5 {
-  margin-bottom: 10px;
+.legend-text {
+  font-size: 0.9rem;
   color: var(--text-color);
 }
 
-.comparison-bar {
+/* Bar Chart */
+.bars-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.bar-item {
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bar-item:hover {
+  transform: translateX(5px);
+}
+
+.bar-label {
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.bar-track {
   height: 20px;
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--border-color);
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 10px;
+  position: relative;
 }
 
 .bar-fill {
   height: 100%;
   border-radius: 10px;
   transition: width 1s ease;
-}
-
-.comparison-level {
-  font-weight: bold;
-  color: var(--primary-color);
-}
-
-/* Timeline View */
-.timeline-view {
-  padding: 20px 0;
-}
-
-.skill-timeline {
   position: relative;
-  padding: 40px 0;
 }
 
-.skill-timeline::before {
-  content: '';
+.bar-value {
   position: absolute;
-  left: 30px;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: linear-gradient(to bottom, var(--primary-color), var(--info-color));
-  border-radius: 2px;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
-.timeline-item {
+.bar-category {
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+  margin-top: 0.25rem;
+}
+
+/* Circular Progress */
+.circular-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.circular-item {
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.circular-item:hover {
+  transform: scale(1.05);
+}
+
+.circular-chart {
   position: relative;
-  margin-bottom: 40px;
-  padding-left: 80px;
-  animation: fadeInUp 0.6s ease forwards;
-  opacity: 0;
+  display: inline-block;
 }
 
-.timeline-marker {
+.circular-svg {
+  transform: rotate(-90deg);
+}
+
+.circular-progress {
+  transition: stroke-dashoffset 1s ease;
+}
+
+.circular-text {
   position: absolute;
-  left: 0;
-  top: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.circular-percentage {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-color);
+  line-height: 1;
+}
+
+.circular-skill {
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+  margin-top: 0.25rem;
+}
+
+/* Network Chart */
+.network-container {
+  display: flex;
+  justify-content: center;
+}
+
+.network-svg {
+  width: 100%;
+  height: auto;
+}
+
+.node-circle {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.node-circle:hover {
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.node-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-color);
+  pointer-events: none;
+}
+
+/* Tooltip */
+.skill-tooltip {
+  position: fixed;
+  background: var(--card-bg);
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  max-width: 250px;
+  pointer-events: none;
+}
+
+.tooltip-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.tooltip-content p {
+  margin: 0 0 1rem 0;
+  color: var(--secondary-color);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.tooltip-details {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 0.25rem;
 }
 
-.marker-icon {
-  width: 60px;
-  height: 60px;
-  background: var(--primary-color);
-  color: white;
+.tooltip-details > div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.tooltip-details span:first-child {
+  color: var(--secondary-color);
+}
+
+.level-value,
+.category-value,
+.experience-value {
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+/* Statistics */
+.skill-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 3rem;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--card-bg);
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  border: 4px solid var(--body-bg);
+  color: white;
+  font-size: 1.2rem;
 }
 
-.marker-level {
-  margin-top: 10px;
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+.stat-label {
   font-size: 0.9rem;
   color: var(--secondary-color);
   font-weight: 500;
 }
 
-.timeline-content {
-  background: var(--card-bg);
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-}
-
-.timeline-content h5 {
-  margin-bottom: 10px;
-  color: var(--text-color);
-}
-
-.timeline-content p {
-  margin-bottom: 15px;
-  color: var(--text-color);
-}
-
-.timeline-progress {
-  height: 8px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-/* Skill Statistics */
-.skill-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 25px;
-  margin-top: 40px;
-}
-
-.stat-card {
-  background: var(--card-bg);
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  transition: transform 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-}
-
-.stat-icon {
-  width: 60px;
-  height: 60px;
-  background: var(--primary-color);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  margin-right: 20px;
-}
-
-.stat-content h4 {
-  margin-bottom: 5px;
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--text-color);
-}
-
-.stat-content p {
-  margin: 0;
-  color: var(--secondary-color);
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-  padding: 20px;
-}
-
-.modal-content {
-  background: var(--card-bg);
-  border-radius: 15px;
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-  padding: 30px 30px 20px;
-  border-bottom: 1px solid var(--border-color);
-  position: relative;
-}
-
-.skill-header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.skill-icon-large {
-  width: 80px;
-  height: 80px;
-  background: var(--primary-color);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-}
-
-.skill-info h3 {
-  margin-bottom: 5px;
-  color: var(--text-color);
-}
-
-.modal-close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: var(--secondary-color);
-  color: white;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-body {
-  padding: 30px;
-}
-
-.skill-level-display {
-  display: flex;
-  align-items: center;
-  gap: 30px;
-  margin-bottom: 30px;
-}
-
-.level-circle {
-  width: 120px;
-  height: 120px;
-  border: 8px solid var(--primary-color);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.level-circle .level-text {
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--primary-color);
-}
-
-.level-description h4 {
-  margin-bottom: 10px;
-  color: var(--text-color);
-}
-
-.level-description p {
-  color: var(--text-color);
-}
-
-.skill-details {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.detail-item i {
-  color: var(--primary-color);
-  font-size: 1.2rem;
-}
-
-.detail-item h5 {
-  margin-bottom: 5px;
-  color: var(--text-color);
-}
-
-.detail-item p {
-  margin: 0;
-  color: var(--secondary-color);
-}
-
-.skill-projects h5 {
-  margin-bottom: 15px;
-  color: var(--text-color);
-}
-
-.project-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.project-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  background: rgba(0, 123, 255, 0.1);
-  border-radius: 8px;
-}
-
-.project-item i {
-  color: var(--primary-color);
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-  .skill-controls {
-    padding: 20px;
-  }
-  
-  .view-toggle {
-    justify-content: center;
-  }
-  
-  .filter-controls {
+  .viz-header {
     flex-direction: column;
     align-items: stretch;
   }
   
-  .skill-grid {
-    grid-template-columns: 1fr;
+  .viz-controls {
+    justify-content: center;
+  }
+  
+  .radar-container {
+    flex-direction: column;
+  }
+  
+  .circular-container {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
   }
   
   .skill-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .skill-level-display {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .skill-details {
-    grid-template-columns: 1fr;
-  }
-  
-  .modal-content {
-    margin: 10px;
-  }
-  
-  .modal-header,
-  .modal-body {
-    padding: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
 }
 </style>
